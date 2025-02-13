@@ -1,3 +1,15 @@
+// 현재 시각
+function currentTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  document.getElementById("clock").innerText = `${hours}시 ${minutes}분 ${seconds}초`;
+}
+setInterval(() => {
+  currentTime();
+}, 1000);
+
 //  각 태그를 자바스크립트로 가져오기
 const taskInput = document.getElementById("taskInput");
 const addTask = document.getElementById("addTask");
@@ -8,16 +20,19 @@ addTask.addEventListener("click", () => {
 
   if (task) {
     const li = document.createElement("li");
-    const deleteTask = document.createElement("button");
+    li.innerHTML = task;
 
+    const deleteTask = document.createElement("button");
     deleteTask.innerHTML = "삭제";
     deleteTask.onclick = () => {
       taskList.removeChild(li);
     };
 
-    li.innerHTML = task;
     li.appendChild(deleteTask);
     taskList.appendChild(li);
+
+    // 입력 필드 초기화
+    taskInput.value = "";
   }
 });
 
