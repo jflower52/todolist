@@ -1,0 +1,136 @@
+/* 전체 */
+* {
+  margin: 0; /* 바깥쪽 여백 */
+  padding: 0; /* 안쪽 여백 */
+}
+
+body {
+  background-color: #faf3e0; /* 배경 색상 */
+  color: #303030; /* 글자 색상 */
+  display: flex; /* 박스 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  height: 100vh; /* 화면 전체 높이 100% 사용 */
+  flex-direction: column; /* 세로방향(위에서 아래)로 배치 */
+}
+
+/* 시계 박스 */
+.clock-Box {
+  padding: 10px;
+  margin-bottom: 30px;
+  text-align: center; /* 글자 가운데 정렬 */
+  width: 350px; /* 없어도 되지만 디자인적 통일감을 주기 위해 설정 */
+}
+
+#clock {
+  font-size: 2rem; /* 기본 글자 2배 크기 */
+  font-weight: bold; /* 글자 굵은 글씨 설정 */
+  color: #d9a22b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* 그림자 효과 | 그림자 가로, 세로 거리와 흐림 정도 | rgb(색상)a(투명도) */
+}
+
+/* 할 일 박스 */
+.todo-Box {
+  background-color: #ffffff;
+  padding: 30px;
+  border: 1px solid #e2e2e2; /* 테두리 */
+  border-radius: 10px; /* 테두리 둥글게 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 350px;
+  text-align: center;
+}
+
+/* 제목 */
+.todo-Box h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* 입력 필드 스타일 */
+input[type="text"],
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus {
+  border-color: #4a90e2;
+  outline: none;
+  background-color: #ffffff; /* 포커스 시 배경색 변경 */
+}
+
+/* 버튼 스타일 */
+button {
+  background-color: #42cc62;
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+/* 버튼 호버(마우스를 올렸을 때 스타일) */
+button:hover {
+  background-color: #218838;
+}
+
+/* 할 일 리스트 */
+#taskList {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+#taskList li {
+  background-color: #e0e0e0;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column; /* 세로 방향으로 나열 */
+  justify-content: flex-start; /* 주축의 시작점에 정렬 */
+  align-items: flex-start; /* 교차축 방향 지정 (row:위에서 아래 column: 왼쪽에서 오른쪽) */
+  font-size: 1.1rem;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 할 일 내용 */
+#taskList li > div:first-child {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+/* 날짜 및 시간 */
+#taskList li > div:nth-child(2) {
+  font-size: 15px;
+  color: #808080;
+  margin-bottom: 10px;
+}
+
+/* 삭제 버튼 */
+#taskList li button {
+  background-color: #ff6b6b;
+  color: rgb(255, 255, 255);
+  padding: 5px 10px;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  align-self: flex-end; /* 버튼을 오른쪽 끝에 위치하게 설정 */
+}
+
+#taskList li button:hover {
+  background-color: #e55050;
+}
