@@ -104,6 +104,9 @@ button:hover {
   font-size: 1.1rem;
   color: #333;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word; /* 긴 단어가 있을 때 자동 줄바꿈 */
+  white-space: normal; /* 줄바꿈 허용 */
+  overflow-wrap: break-word; /* 길이가 넘치는 단어도 줄바꿈 */
 }
 
 /* 할 일 내용 */

@@ -31,7 +31,7 @@ addTask.onclick = function () {
   if (task && date && time) {
     // 새로운 <li> 요소 생성
     const li = document.createElement("li");
-    
+
     // 할 일 내용 추가
     const taskContent = document.createElement("div");
     taskContent.innerHTML = `${task}`;
