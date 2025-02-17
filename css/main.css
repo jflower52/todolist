@@ -10,7 +10,8 @@ body {
   display: flex; /* 박스 정렬 */
   justify-content: center; /* 가로 중앙 정렬 */
   align-items: center; /* 세로 중앙 정렬 */
-  height: 100vh; /* 화면 전체 높이 100% 사용 */
+  height: auto; /* 화면 높이 자동 */
+  min-height: 100vh; /* 최소 높이를 화면 높이만큼 설정 */
   flex-direction: column; /* 세로방향(위에서 아래)로 배치 */
 }
 
