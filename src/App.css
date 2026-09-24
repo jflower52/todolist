@@ -331,15 +331,55 @@ body {
 }
 
 /* =========================================
-   수정됨: 입력 폼 (텍스트 영역 넓게, 날짜 고정) 
+   🔥 완벽한 커스텀 날짜 폼 (파란 줄 절대 안 생김)
 ========================================= */
 .input-section {
   display: flex;
   gap: 12px;
   margin-bottom: 0;
-  align-items: stretch; /* 높이 맞춤 */
+  align-items: stretch;
 }
-.date-input,
+
+/* 날짜 입력칸을 감싸는 부모 */
+.date-input-wrapper {
+  position: relative;
+  width: 160px;
+  flex-shrink: 0;
+}
+
+/* 실제 화면에 보이는 예쁜 가짜 입력창 */
+.date-display {
+  width: 100%;
+  height: 100%;
+  padding: 12px 16px;
+  background-color: var(--surface-color);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* 투명하게 숨겨진 진짜 input (가장 위에 덮어씌워짐) */
+.hidden-date-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0; /* 물리적으로 투명하기 때문에 파란색 드래그가 절대 보이지 않음 */
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* 진짜 입력창이 선택되었을 때 가짜 창 테두리 색상 변경 */
+.hidden-date-input:focus + .date-display {
+  border-color: var(--primary-color);
+}
+
 .text-input {
   background-color: var(--surface-color);
   color: var(--text-main);
@@ -348,22 +388,9 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   outline: none;
-  box-sizing: border-box; /* 패딩 포함 크기 계산 */
-}
-
-/* 날짜 입력창은 고정 크기로 찌그러지지 않게 방어 */
-.date-input {
-  width: 150px;
-  flex-shrink: 0;
-}
-
-/* 텍스트 입력창이 남은 공간을 넓게 모두 차지하도록 설정 */
-.text-input {
   flex: 1;
-  min-width: 0; /* flex-item이 화면을 뚫고 나가는 현상 방지 */
+  min-width: 0;
 }
-
-.date-input:focus,
 .text-input:focus {
   border-color: var(--primary-color);
 }
@@ -378,18 +405,19 @@ body {
   cursor: pointer;
   transition: background-color 0.2s;
   white-space: nowrap;
-  flex-shrink: 0; /* 버튼 크기 유지 */
+  flex-shrink: 0;
 }
 .add-btn:hover {
   background-color: var(--primary-hover);
 }
 
-/* 사이드바 캘린더 뷰 모드일 때의 입력창 세로 정렬 */
+/* 사이드바 내부 폼 */
 .sidebar-detail-view .input-section {
   flex-direction: column;
 }
-.sidebar-detail-view .date-input {
+.sidebar-detail-view .date-input-wrapper {
   width: 100%;
+  height: 45px;
 }
 
 /* --- 필터 탭 --- */
@@ -599,9 +627,10 @@ body {
   .input-section {
     flex-direction: column;
   }
-  .date-input {
+  .date-input-wrapper {
     width: 100%;
-  } /* 모바일에서는 다시 날짜 창도 100% 사용 */
+    height: 45px;
+  }
   .add-btn {
     width: 100%;
     padding: 12px;

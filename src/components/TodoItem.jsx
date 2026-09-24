@@ -29,12 +29,23 @@ export const TodoItem = ({ todo }) => {
     return (
       <li className="todo-item editing">
         <div className="edit-inputs">
-          <input
-            type="date"
-            value={editDate}
-            onChange={(e) => setEditDate(e.target.value)}
-            className="date-input"
-          />
+          <div className="date-input-wrapper">
+            <input
+              type="date"
+              value={editDate}
+              onChange={(e) => setEditDate(e.target.value)}
+              onClick={(e) => {
+                // 여기도 마찬가지로 빈 블록을 주석으로 채웠습니다.
+                try {
+                  e.target.showPicker();
+                } catch {
+                  /* ignore */
+                }
+              }}
+              className="hidden-date-input"
+            />
+            <div className="date-display">{editDate || "날짜 선택"}</div>
+          </div>
           <input
             type="text"
             value={editText}

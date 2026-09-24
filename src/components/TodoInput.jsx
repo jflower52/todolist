@@ -19,12 +19,27 @@ export const TodoInput = () => {
 
   return (
     <div className="input-section">
-      <input
-        type="date"
-        value={inputDate}
-        onChange={(e) => setInputDate(e.target.value)}
-        className="date-input"
-      />
+      <div className="date-input-wrapper">
+        <input
+          type="date"
+          value={inputDate}
+          onChange={(e) => setInputDate(e.target.value)}
+          onClick={(e) => {
+            // 중괄호 안에 주석을 추가하여 Empty block 경고를 해결했습니다.
+            try {
+              e.target.showPicker();
+            } catch {
+              /* ignore */
+            }
+          }}
+          className="hidden-date-input"
+        />
+        <div className="date-display">
+          <span>{inputDate || "연도-월-일"}</span>
+          <span className="calendar-icon">📅</span>
+        </div>
+      </div>
+
       <input
         type="text"
         value={inputText}
