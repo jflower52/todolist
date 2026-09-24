@@ -234,8 +234,8 @@ body {
   border-left: 1px solid var(--border-color);
 }
 .large-calendar .react-calendar__tile {
-  height: 120px; /* 큰 달력은 칸을 길게 */
-  justify-content: flex-start; /* 글씨를 위로 올림 */
+  height: 120px;
+  justify-content: flex-start;
   align-items: stretch;
   padding: 8px !important;
   border-radius: 0;
@@ -258,7 +258,6 @@ body {
   border: 1px solid var(--primary-color) !important;
 }
 
-/* 대형 달력 내부 일정 텍스트 미리보기 */
 .calendar-tasks-preview {
   display: flex;
   flex-direction: column;
@@ -331,11 +330,14 @@ body {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 입력 폼 */
+/* =========================================
+   수정됨: 입력 폼 (텍스트 영역 넓게, 날짜 고정) 
+========================================= */
 .input-section {
   display: flex;
   gap: 12px;
   margin-bottom: 0;
+  align-items: stretch; /* 높이 맞춤 */
 }
 .date-input,
 .text-input {
@@ -346,17 +348,28 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   outline: none;
-  width: 100%;
+  box-sizing: border-box; /* 패딩 포함 크기 계산 */
 }
+
+/* 날짜 입력창은 고정 크기로 찌그러지지 않게 방어 */
+.date-input {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+/* 텍스트 입력창이 남은 공간을 넓게 모두 차지하도록 설정 */
 .text-input {
   flex: 1;
+  min-width: 0; /* flex-item이 화면을 뚫고 나가는 현상 방지 */
 }
+
 .date-input:focus,
 .text-input:focus {
   border-color: var(--primary-color);
 }
+
 .add-btn {
-  padding: 12px 24px;
+  padding: 0 24px;
   background-color: var(--primary-color);
   color: white;
   font-weight: 600;
@@ -365,14 +378,18 @@ body {
   cursor: pointer;
   transition: background-color 0.2s;
   white-space: nowrap;
+  flex-shrink: 0; /* 버튼 크기 유지 */
 }
 .add-btn:hover {
   background-color: var(--primary-hover);
 }
 
-/* 사이드바 내부 폼 세로 정렬 */
+/* 사이드바 캘린더 뷰 모드일 때의 입력창 세로 정렬 */
 .sidebar-detail-view .input-section {
   flex-direction: column;
+}
+.sidebar-detail-view .date-input {
+  width: 100%;
 }
 
 /* --- 필터 탭 --- */
@@ -402,8 +419,6 @@ body {
   color: var(--primary-color);
   border: 1px solid var(--border-color);
 }
-
-/* 사이드바 내부 탭 맞춤 */
 .sidebar-detail-view .filter-tabs button.active {
   background-color: var(--bg-color);
 }
@@ -580,15 +595,18 @@ body {
     padding: 24px 20px;
     overflow-y: visible;
   }
+
   .input-section {
     flex-direction: column;
   }
   .date-input {
     width: 100%;
-  }
+  } /* 모바일에서는 다시 날짜 창도 100% 사용 */
   .add-btn {
     width: 100%;
+    padding: 12px;
   }
+
   .todo-item {
     flex-direction: column;
     align-items: flex-start;
