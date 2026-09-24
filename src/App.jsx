@@ -1,91 +1,67 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { TodoInput } from "@/components/TodoInput";
+import { TodoList } from "@/components/TodoList";
+import { CalendarWidget } from "@/components/CalendarWidget";
+import { ProgressBar } from "@/components/ProgressBar";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTodoStore } from "@/store/useTodoStore";
 import "./App.css";
 
 function App() {
-  // 1. 초기 데이터를 로컬 스토리지에서 불러오기
-  const [todos, setTodos] = useState(() => {
-    const savedTodos = localStorage.getItem("my-schedules");
-    return savedTodos ? JSON.parse(savedTodos) : [];
-  });
+  const filter = useTodoStore((state) => state.filter);
+  const setFilter = useTodoStore((state) => state.setFilter);
+  const isDarkMode = useTodoStore((state) => state.isDarkMode);
 
-  const [inputText, setInputText] = useState("");
-  const [inputDate, setInputDate] = useState(""); // 날짜 상태 추가
-
-  // 2. todos 데이터가 변경될 때마다 자동으로 로컬 스토리지에 저장
+  // 다크 모드 상태가 바뀔 때마다 HTML 최상단 태그에 속성을 추가/제거합니다.
   useEffect(() => {
-    localStorage.setItem("my-schedules", JSON.stringify(todos));
-  }, [todos]);
-
-  // 일정 추가
-  const addTodo = () => {
-    if (inputText.trim() === "" || inputDate === "") {
-      alert("날짜와 일정 내용을 모두 입력해주세요!");
-      return;
+    if (isDarkMode) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
     }
-
-    setTodos([
-      ...todos,
-      {
-        id: Date.now(),
-        text: inputText,
-        date: inputDate, // 날짜 데이터 추가
-        isDone: false,
-      },
-    ]);
-
-    setInputText("");
-    setInputDate("");
-  };
-
-  const toggleTodo = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo,
-      ),
-    );
-  };
-
-  const deleteTodo = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
+  }, [isDarkMode]);
 
   return (
-    <div className="container">
-      <h1>📅 나의 일정 관리</h1>
+    <div className="dashboard">
+      <header className="dashboard-header">
+        <h1>📅 나의 일정 관리</h1>
+        <ThemeToggle />
+      </header>
 
-      <div className="input-area">
-        <input
-          type="date"
-          value={inputDate}
-          onChange={(e) => setInputDate(e.target.value)}
-          className="date-input"
-        />
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTodo()}
-          placeholder="새로운 일정을 입력하세요"
-          className="text-input"
-        />
-        <button onClick={addTodo} className="add-btn">
-          추가
-        </button>
-      </div>
+      <div className="dashboard-content">
+        <aside className="sidebar">
+          <CalendarWidget />
+        </aside>
 
-      <ul className="todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} className={todo.isDone ? "done" : ""}>
-            <span onClick={() => toggleTodo(todo.id)} className="todo-text">
-              {todo.isDone ? "✅ " : "⬜ "}
-              <strong className="todo-date">[{todo.date}]</strong> {todo.text}
-            </span>
-            <button onClick={() => deleteTodo(todo.id)} className="delete-btn">
-              삭제
+        <main className="main-board">
+          <ProgressBar />
+
+          <TodoInput />
+
+          <div className="filter-tabs">
+            <button
+              className={filter === "all" ? "active" : ""}
+              onClick={() => setFilter("all")}
+            >
+              전체
             </button>
-          </li>
-        ))}
-      </ul>
+            <button
+              className={filter === "active" ? "active" : ""}
+              onClick={() => setFilter("active")}
+            >
+              진행 중
+            </button>
+            <button
+              className={filter === "completed" ? "active" : ""}
+              onClick={() => setFilter("completed")}
+            >
+              완료
+            </button>
+          </div>
+
+          <TodoList />
+        </main>
+      </div>
     </div>
   );
 }
