@@ -2,121 +2,328 @@
 :root {
   --primary-color: #4f46e5;
   --primary-hover: #4338ca;
-  --bg-color: #f3f4f6;
+  --bg-color: #ffffff;
+  --sidebar-bg: #f9fafb;
   --surface-color: #ffffff;
   --text-main: #111827;
   --text-muted: #6b7280;
   --border-color: #e5e7eb;
 }
 
-/* 다크 모드 색상 팔레트 */
 [data-theme="dark"] {
   --primary-color: #6366f1;
   --primary-hover: #818cf8;
   --bg-color: #111827;
-  --surface-color: #1f2937;
+  --sidebar-bg: #1f2937;
+  --surface-color: #374151;
   --text-main: #f9fafb;
   --text-muted: #9ca3af;
-  --border-color: #374151;
+  --border-color: #4b5563;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 body {
   background-color: var(--bg-color);
-  margin: 0;
-  padding: 0;
-  transition: background-color 0.3s ease;
-}
-
-/* 대시보드 메인 레이아웃 */
-.dashboard {
-  max-width: 1000px;
-  margin: 60px auto;
-  padding: 32px;
-  background-color: var(--surface-color);
-  border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   font-family:
     "Pretendard",
     -apple-system,
     sans-serif;
-  transition: background-color 0.3s ease;
 }
 
-.dashboard-header {
+/* 앱 전체 컨테이너 */
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ⬅️ 왼쪽 사이드바 */
+.app-sidebar {
+  width: 340px;
+  min-width: 340px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+  transition: background-color 0.3s;
+}
+
+.sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 16px;
+  margin-bottom: 24px;
 }
-
-.dashboard-header h1 {
+.sidebar-header h1 {
+  font-size: 20px;
   margin: 0;
-  font-size: 28px;
-  color: var(--text-main);
-  letter-spacing: -0.5px;
+}
+.menu-title {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .theme-toggle-btn {
-  padding: 8px 16px;
+  padding: 6px 12px;
   background-color: transparent;
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .theme-toggle-btn:hover {
   background-color: var(--border-color);
 }
 
-/* 2단 그리드 레이아웃 */
-.dashboard-content {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 32px;
-  align-items: start;
+/* --- 뷰 모드 전환 스위치 --- */
+.view-toggle-group {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 32px;
+  background-color: var(--border-color);
+  padding: 4px;
+  border-radius: 10px;
+}
+.view-toggle-group button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background-color: transparent;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-toggle-group button.active {
+  background-color: var(--surface-color);
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* --- 진행률 바 (Progress Bar) --- */
-.progress-section {
-  background: var(--surface-color);
-  padding: 20px;
-  border-radius: 12px;
+/* ➡️ 오른쪽 메인 작업 영역 */
+.app-main {
+  flex: 1;
+  background-color: var(--bg-color);
+  overflow-y: auto;
+  padding: 48px;
+}
+.main-header {
+  max-width: 800px;
+  margin: 0 auto 32px auto;
+}
+.main-header h2 {
+  font-size: 28px;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* --- 달력 컴포넌트 공통 --- */
+.calendar-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.react-calendar {
+  width: 100%;
+  background-color: transparent !important;
+  color: var(--text-main) !important;
+  border: none !important;
+  padding: 0;
+  font-family: inherit !important;
+}
+.react-calendar__navigation button {
+  color: var(--text-main) !important;
+  font-weight: bold;
+  font-size: 15px;
+  border-radius: 8px;
+}
+.react-calendar__navigation button:hover {
+  background-color: var(--border-color) !important;
+}
+
+/* 기본(작은) 달력 타일 */
+.react-calendar__tile {
+  color: var(--text-main) !important;
+  padding: 8px 0 !important;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+}
+.react-calendar__tile--now {
+  background: var(--border-color) !important;
+  font-weight: bold;
+}
+.react-calendar__tile--active {
+  background: var(--primary-color) !important;
+  color: white !important;
+  font-weight: bold;
+}
+.react-calendar__tile:hover {
+  background: var(--border-color) !important;
+}
+
+/* 작은 달력 일정 마커 */
+.calendar-marker-container {
+  margin-top: 4px;
+  height: 6px;
+}
+.calendar-marker {
+  width: 6px;
+  height: 6px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+}
+.react-calendar__tile--active .calendar-marker {
+  background-color: white;
+}
+
+.reset-date-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
   border: 1px solid var(--border-color);
-  margin-bottom: 24px;
+  border-radius: 8px;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-date-btn:hover {
+  background-color: var(--border-color);
 }
 
+/* --- 대형(Large) 달력 커스텀 --- */
+.large-calendar {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--surface-color) !important;
+}
+.large-calendar .react-calendar__month-view__days {
+  border-top: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+}
+.large-calendar .react-calendar__tile {
+  height: 120px; /* 큰 달력은 칸을 길게 */
+  justify-content: flex-start; /* 글씨를 위로 올림 */
+  align-items: stretch;
+  padding: 8px !important;
+  border-radius: 0;
+  border-right: 1px solid var(--border-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+.large-calendar .react-calendar__tile > abbr {
+  text-align: right;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.large-calendar .react-calendar__tile--now {
+  background: rgba(79, 70, 229, 0.05) !important;
+}
+.large-calendar .react-calendar__tile--active {
+  background: rgba(79, 70, 229, 0.1) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--primary-color) !important;
+}
+
+/* 대형 달력 내부 일정 텍스트 미리보기 */
+.calendar-tasks-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+.preview-task {
+  font-size: 11px;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 4px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-weight: 500;
+}
+.preview-task.done {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+.preview-more {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* --- 등록 및 진행률 바 --- */
+.registration-section {
+  margin-bottom: 40px;
+}
+.progress-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+}
 .progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
-
 .progress-title {
   font-size: 15px;
   font-weight: 700;
   color: var(--text-main);
 }
-
 .progress-stats {
   font-size: 14px;
   color: var(--primary-color);
   font-weight: 600;
 }
-
 .progress-bar-bg {
   width: 100%;
-  height: 10px;
+  height: 8px;
   background-color: var(--border-color);
   border-radius: 10px;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
-
 .progress-bar-fill {
   height: 100%;
   background-color: var(--primary-color);
@@ -124,89 +331,12 @@ body {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- 달력 (Calendar) 커스텀 스타일 --- */
-.calendar-widget {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.react-calendar {
-  width: 100%;
-  background-color: var(--surface-color) !important;
-  color: var(--text-main) !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 12px;
-  padding: 16px;
-  font-family: inherit !important;
-  border-collapse: collapse;
-}
-
-.react-calendar__navigation button {
-  color: var(--text-main) !important;
-  font-weight: bold;
-  font-size: 16px;
-  border-radius: 8px;
-}
-
-.react-calendar__navigation button:hover,
-.react-calendar__navigation button:focus {
-  background-color: var(--border-color) !important;
-}
-
-.react-calendar__tile {
-  color: var(--text-main) !important;
-  padding: 10px 0 !important;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.react-calendar__tile--now {
-  background: var(--border-color) !important;
-  font-weight: bold;
-}
-
-.react-calendar__tile--active {
-  background: var(--primary-color) !important;
-  color: white !important;
-  font-weight: bold;
-}
-
-.react-calendar__tile:hover {
-  background: var(--border-color) !important;
-}
-
-.reset-date-btn {
-  width: 100%;
-  padding: 12px;
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-main);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.reset-date-btn:hover {
-  background-color: var(--border-color);
-}
-.reset-date-btn.active {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-/* 입력 영역 */
+/* 입력 폼 */
 .input-section {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
-  background: transparent;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
+  margin-bottom: 0;
 }
-
 .date-input,
 .text-input {
   background-color: var(--surface-color);
@@ -216,65 +346,99 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   outline: none;
-}
-.date-input {
-  width: 140px;
+  width: 100%;
 }
 .text-input {
   flex: 1;
 }
-
+.date-input:focus,
+.text-input:focus {
+  border-color: var(--primary-color);
+}
 .add-btn {
-  padding: 0 24px;
+  padding: 12px 24px;
   background-color: var(--primary-color);
   color: white;
   font-weight: 600;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+.add-btn:hover {
+  background-color: var(--primary-hover);
 }
 
-/* 필터 탭 */
+/* 사이드바 내부 폼 세로 정렬 */
+.sidebar-detail-view .input-section {
+  flex-direction: column;
+}
+
+/* --- 필터 탭 --- */
 .filter-tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap; /* 좁아지면 줄바꿈 되도록 설정 */
 }
 .filter-tabs button {
   padding: 8px 16px;
-  border: none;
+  border: 1px solid transparent;
   background-color: transparent;
   color: var(--text-muted);
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-tabs button:hover {
+  color: var(--text-main);
 }
 .filter-tabs button.active {
-  background-color: var(--border-color);
+  background-color: var(--sidebar-bg);
   color: var(--primary-color);
+  border: 1px solid var(--border-color);
 }
 
-/* 리스트 및 아이템 */
+/* 사이드바 내부 탭 맞춤 */
+.sidebar-detail-view .filter-tabs button.active {
+  background-color: var(--bg-color);
+}
+
+/* --- 리스트 아이템 --- */
 .todo-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 }
-
 .todo-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  padding: 16px 8px;
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+.todo-item:last-child {
+  border-bottom: none;
+}
+.todo-item:hover {
+  background-color: var(--sidebar-bg);
+  border-radius: 8px;
+}
+.sidebar-detail-view .todo-item:hover {
+  background-color: var(--bg-color);
 }
 .todo-item.editing {
-  border-color: var(--primary-color);
+  background-color: var(--sidebar-bg);
+  border: 1px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 8px 0;
 }
 
 .todo-content {
@@ -284,7 +448,6 @@ body {
   flex: 1;
   cursor: pointer;
 }
-
 .edit-inputs {
   display: flex;
   gap: 8px;
@@ -296,34 +459,39 @@ body {
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 6px;
+  outline: none;
+  width: 100%;
+}
+.edit-inputs input:focus {
+  border-color: var(--primary-color);
+}
+.sidebar-detail-view .edit-inputs {
+  flex-direction: column;
 }
 
 .checkbox {
   width: 22px;
   height: 22px;
   border: 2px solid var(--border-color);
+  background-color: var(--surface-color);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: transparent;
+  flex-shrink: 0;
 }
 .todo-item.done .checkbox {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
 }
-
 .todo-date-badge {
-  background-color: var(--border-color);
-  color: var(--text-main);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap; /* 날짜가 줄바꿈되지 않도록 방지 */
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
 }
-
 .todo-text {
   font-size: 16px;
   color: var(--text-main);
@@ -338,10 +506,15 @@ body {
   display: flex;
   gap: 6px;
   margin-left: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.todo-item:hover .todo-actions {
+  opacity: 1;
 }
 .todo-actions button {
-  padding: 8px 12px;
-  background-color: transparent;
+  padding: 6px 10px;
+  background-color: var(--surface-color);
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
@@ -352,17 +525,26 @@ body {
   color: var(--text-main);
   border: 1px solid var(--border-color);
 }
+.edit-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
 .delete-btn {
   color: #ef4444;
   border: 1px solid #fee2e2;
+}
+.delete-btn:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
 }
 [data-theme="dark"] .delete-btn {
   border-color: #7f1d1d;
 }
 .save-btn {
-  color: white;
+  color: white !important;
   background-color: var(--primary-color) !important;
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--primary-color) !important;
 }
 .cancel-btn {
   color: var(--text-muted);
@@ -374,52 +556,50 @@ body {
   padding: 40px 0;
   color: var(--text-muted);
   font-size: 15px;
+  line-height: 1.6;
 }
 
-/* =========================================
-   📱 반응형 모바일 웹 대응 (Media Queries)
-========================================= */
+/* 모바일 반응형 */
 @media (max-width: 768px) {
-  .dashboard {
-    margin: 16px; /* 폰 화면에서는 바깥 여백을 줄여 공간 확보 */
+  html,
+  body {
+    overflow: auto;
+  }
+  .app-container {
+    flex-direction: column;
+    height: auto;
+  }
+  .app-sidebar {
+    width: 100%;
+    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
     padding: 20px;
   }
-
-  .dashboard-header h1 {
-    font-size: 24px; /* 모바일에서는 제목 크기를 살짝 줄임 */
+  .app-main {
+    padding: 24px 20px;
+    overflow-y: visible;
   }
-
-  .dashboard-content {
-    grid-template-columns: 1fr; /* 2단 분리를 해제하고 세로 1줄로 배치 */
-    gap: 24px;
-  }
-
   .input-section {
-    flex-direction: column; /* 폼 요소들을 세로로 쌓음 */
+    flex-direction: column;
   }
-
   .date-input {
     width: 100%;
   }
-
   .add-btn {
     width: 100%;
-    padding: 12px; /* 버튼을 누르기 쉽게 크기 키움 */
   }
-
   .todo-item {
-    flex-direction: column; /* 리스트 내부 항목도 좁아지면 위아래로 분리 */
+    flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 12px;
   }
-
   .todo-actions {
     margin-left: 0;
     width: 100%;
-    display: flex;
-    justify-content: flex-end; /* 버튼을 우측 정렬 */
+    justify-content: flex-end;
+    opacity: 1;
   }
-
   .edit-inputs {
     flex-direction: column;
     width: 100%;

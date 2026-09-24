@@ -7,11 +7,13 @@ export const useTodoStore = create(
       todos: [],
       filter: "all",
       selectedDate: "",
-      isDarkMode: false, // 다크 모드 상태 추가
+      isDarkMode: false,
+      viewMode: "list", // 'list' (리스트 뷰) 또는 'calendar' (달력 뷰)
 
       setFilter: (newFilter) => set({ filter: newFilter }),
       setSelectedDate: (dateStr) => set({ selectedDate: dateStr }),
-      toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })), // 모드 전환 함수
+      toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+      setViewMode: (mode) => set({ viewMode: mode }), // 뷰 전환 함수
 
       addTodo: (text, date) =>
         set((state) => ({
