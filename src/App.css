@@ -24,10 +24,10 @@ body {
   background-color: var(--bg-color);
   margin: 0;
   padding: 0;
-  transition: background-color 0.3s ease; /* 부드러운 배경색 전환 */
+  transition: background-color 0.3s ease;
 }
 
-/* 대시보드 메인 레이아웃 확판 */
+/* 대시보드 메인 레이아웃 */
 .dashboard {
   max-width: 1000px;
   margin: 60px auto;
@@ -241,6 +241,7 @@ body {
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap; /* 좁아지면 줄바꿈 되도록 설정 */
 }
 .filter-tabs button {
   padding: 8px 16px;
@@ -320,6 +321,7 @@ body {
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap; /* 날짜가 줄바꿈되지 않도록 방지 */
 }
 
 .todo-text {
@@ -344,6 +346,7 @@ body {
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 .edit-btn {
   color: var(--text-main);
@@ -371,4 +374,54 @@ body {
   padding: 40px 0;
   color: var(--text-muted);
   font-size: 15px;
+}
+
+/* =========================================
+   📱 반응형 모바일 웹 대응 (Media Queries)
+========================================= */
+@media (max-width: 768px) {
+  .dashboard {
+    margin: 16px; /* 폰 화면에서는 바깥 여백을 줄여 공간 확보 */
+    padding: 20px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px; /* 모바일에서는 제목 크기를 살짝 줄임 */
+  }
+
+  .dashboard-content {
+    grid-template-columns: 1fr; /* 2단 분리를 해제하고 세로 1줄로 배치 */
+    gap: 24px;
+  }
+
+  .input-section {
+    flex-direction: column; /* 폼 요소들을 세로로 쌓음 */
+  }
+
+  .date-input {
+    width: 100%;
+  }
+
+  .add-btn {
+    width: 100%;
+    padding: 12px; /* 버튼을 누르기 쉽게 크기 키움 */
+  }
+
+  .todo-item {
+    flex-direction: column; /* 리스트 내부 항목도 좁아지면 위아래로 분리 */
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .todo-actions {
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* 버튼을 우측 정렬 */
+  }
+
+  .edit-inputs {
+    flex-direction: column;
+    width: 100%;
+  }
 }
