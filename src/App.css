@@ -130,7 +130,7 @@ body {
 }
 .main-header {
   max-width: 800px;
-  margin: 0 auto 32px auto;
+  margin: 0 auto 24px auto;
 }
 .main-header h2 {
   font-size: 28px;
@@ -140,6 +140,91 @@ body {
 .main-content {
   max-width: 800px;
   margin: 0 auto;
+}
+
+/* =========================================
+   ✅ 상단 미니 대시보드 요약 카드 4종
+========================================= */
+.summary-dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.summary-card {
+  background-color: var(--sidebar-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.summary-card.card-today,
+.summary-card.card-active {
+  cursor: pointer;
+}
+
+.summary-card.card-today:hover,
+.summary-card.card-active:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.summary-card.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.summary-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.summary-icon {
+  font-size: 15px;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.summary-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* 각 카드별 숫자 강조 색상 */
+.card-today .summary-value {
+  color: #f59e0b;
+}
+.card-overdue .summary-value {
+  color: #ef4444;
+}
+.card-pinned .summary-value {
+  color: #eab308;
+}
+.card-active .summary-value {
+  color: var(--primary-color);
 }
 
 /* --- 달력 컴포넌트 공통 --- */
@@ -738,7 +823,6 @@ body {
   background-color: var(--bg-color);
 }
 
-/* ✅ 상단 고정(Pinned)된 아이템 강조 스타일 */
 .todo-item.pinned:not(.done) {
   background-color: rgba(245, 158, 11, 0.06);
   border-left: 3px solid #f59e0b;
@@ -764,7 +848,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* ✅ 별표(상단 고정) 버튼 스타일 */
 .pin-btn {
   background: transparent;
   border: none;
@@ -1053,6 +1136,11 @@ body {
   .app-main {
     padding: 24px 20px;
     overflow-y: visible;
+  }
+
+  /* 모바일에서는 요약 카드를 2x2 격자로 배치 */
+  .summary-dashboard {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .input-section {

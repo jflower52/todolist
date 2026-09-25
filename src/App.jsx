@@ -17,6 +17,13 @@ const FILTER_CATEGORIES = [
   "기타",
 ];
 
+// 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져오는 헬퍼 함수
+const getTodayStr = () => {
+  const today = new Date();
+  const offset = today.getTimezoneOffset() * 60000;
+  return new Date(today.getTime() - offset).toISOString().split("T")[0];
+};
+
 function App() {
   const todos = useTodoStore((state) => state.todos);
   const filter = useTodoStore((state) => state.filter);
@@ -28,6 +35,7 @@ function App() {
   const clearCompleted = useTodoStore((state) => state.clearCompleted);
 
   const selectedDate = useTodoStore((state) => state.selectedDate);
+  const setSelectedDate = useTodoStore((state) => state.setSelectedDate);
   const isDarkMode = useTodoStore((state) => state.isDarkMode);
   const viewMode = useTodoStore((state) => state.viewMode);
   const setViewMode = useTodoStore((state) => state.setViewMode);
@@ -35,7 +43,6 @@ function App() {
   const subscribeToTodos = useTodoStore((state) => state.subscribeToTodos);
   const isCloudSynced = useTodoStore((state) => state.isCloudSynced);
 
-  // ✅ 앱 시작 시 파이어베이스 실시간 동기화 연결
   useEffect(() => {
     const unsubscribe = subscribeToTodos();
     return () => unsubscribe();
@@ -48,6 +55,16 @@ function App() {
       document.documentElement.removeAttribute("data-theme");
     }
   }, [isDarkMode]);
+
+  // ✅ 대시보드 요약 카드용 실시간 통계 계산 (미완료 일정 기준)
+  const todayStr = getTodayStr();
+  const activeTodos = todos.filter((t) => !t.isDone);
+  const todayCount = activeTodos.filter((t) => t.date === todayStr).length;
+  const overdueCount = activeTodos.filter(
+    (t) => t.date && t.date < todayStr,
+  ).length;
+  const pinnedCount = activeTodos.filter((t) => Boolean(t.isPinned)).length;
+  const totalActiveCount = activeTodos.length;
 
   const completedCount = todos.filter((todo) =>
     selectedDate ? todo.date === selectedDate && todo.isDone : todo.isDone,
@@ -195,6 +212,66 @@ function App() {
               <h2>{selectedDate ? `${selectedDate} 일정` : "📂 전체 일정"}</h2>
             </div>
             <div className="main-content">
+              {/* ✅ 상단 미니 대시보드 요약 카드 4종 */}
+              <section className="summary-dashboard">
+                <div
+                  className={`summary-card card-today ${selectedDate === todayStr ? "selected" : ""}`}
+                  onClick={() =>
+                    setSelectedDate(selectedDate === todayStr ? "" : todayStr)
+                  }
+                  title="클릭하여 오늘 일정만 보기 / 해제"
+                >
+                  <div className="summary-card-header">
+                    <span className="summary-label">오늘 마감</span>
+                    <span className="summary-icon">🔥</span>
+                  </div>
+                  <div className="summary-value">
+                    {todayCount}
+                    <span className="summary-unit">건</span>
+                  </div>
+                </div>
+
+                <div className="summary-card card-overdue">
+                  <div className="summary-card-header">
+                    <span className="summary-label">지연된 일정</span>
+                    <span className="summary-icon">🚨</span>
+                  </div>
+                  <div className="summary-value">
+                    {overdueCount}
+                    <span className="summary-unit">건</span>
+                  </div>
+                </div>
+
+                <div className="summary-card card-pinned">
+                  <div className="summary-card-header">
+                    <span className="summary-label">중요 고정</span>
+                    <span className="summary-icon">⭐</span>
+                  </div>
+                  <div className="summary-value">
+                    {pinnedCount}
+                    <span className="summary-unit">건</span>
+                  </div>
+                </div>
+
+                <div
+                  className={`summary-card card-active ${!selectedDate && filter === "active" ? "selected" : ""}`}
+                  onClick={() => {
+                    setSelectedDate("");
+                    setFilter("active");
+                  }}
+                  title="클릭하여 전체 남은 할 일 보기"
+                >
+                  <div className="summary-card-header">
+                    <span className="summary-label">남은 할 일</span>
+                    <span className="summary-icon">⏳</span>
+                  </div>
+                  <div className="summary-value">
+                    {totalActiveCount}
+                    <span className="summary-unit">건</span>
+                  </div>
+                </div>
+              </section>
+
               <section className="registration-section">
                 <ProgressBar />
                 <TodoInput />
