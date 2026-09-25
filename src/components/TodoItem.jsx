@@ -35,7 +35,6 @@ export const TodoItem = ({ todo }) => {
               value={editDate}
               onChange={(e) => setEditDate(e.target.value)}
               onClick={(e) => {
-                // 여기도 마찬가지로 빈 블록을 주석으로 채웠습니다.
                 try {
                   e.target.showPicker();
                 } catch {
@@ -67,11 +66,18 @@ export const TodoItem = ({ todo }) => {
 
   return (
     <li className={`todo-item ${todo.isDone ? "done" : ""}`}>
-      <div onClick={() => toggleTodo(todo.id)} className="todo-content">
+      {/* 상단 좌측: 체크박스 및 날짜 */}
+      <div onClick={() => toggleTodo(todo.id)} className="todo-meta">
         <div className="checkbox">✔</div>
         <span className="todo-date-badge">{todo.date}</span>
+      </div>
+
+      {/* 본문: 일정 텍스트 (캘린더 뷰에서는 아래 줄 전체 공간 사용) */}
+      <div onClick={() => toggleTodo(todo.id)} className="todo-body">
         <span className="todo-text">{todo.text}</span>
       </div>
+
+      {/* 상단 우측: 수정 및 삭제 버튼 */}
       <div className="todo-actions">
         <button onClick={() => setIsEditing(true)} className="edit-btn">
           수정

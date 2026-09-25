@@ -330,9 +330,7 @@ body {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* =========================================
-   🔥 완벽한 커스텀 날짜 폼 (파란 줄 절대 안 생김)
-========================================= */
+/* --- 커스텀 날짜 폼 --- */
 .input-section {
   display: flex;
   gap: 12px;
@@ -340,14 +338,12 @@ body {
   align-items: stretch;
 }
 
-/* 날짜 입력칸을 감싸는 부모 */
 .date-input-wrapper {
   position: relative;
   width: 160px;
   flex-shrink: 0;
 }
 
-/* 실제 화면에 보이는 예쁜 가짜 입력창 */
 .date-display {
   width: 100%;
   height: 100%;
@@ -363,19 +359,17 @@ body {
   box-sizing: border-box;
 }
 
-/* 투명하게 숨겨진 진짜 input (가장 위에 덮어씌워짐) */
 .hidden-date-input {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0; /* 물리적으로 투명하기 때문에 파란색 드래그가 절대 보이지 않음 */
+  opacity: 0;
   cursor: pointer;
   z-index: 10;
 }
 
-/* 진짜 입력창이 선택되었을 때 가짜 창 테두리 색상 변경 */
 .hidden-date-input:focus + .date-display {
   border-color: var(--primary-color);
 }
@@ -451,7 +445,7 @@ body {
   background-color: var(--bg-color);
 }
 
-/* --- 리스트 아이템 --- */
+/* --- 리스트 아이템 (기본 리스트 뷰: 1줄 배치) --- */
 .todo-list {
   display: flex;
   flex-direction: column;
@@ -459,8 +453,8 @@ body {
 }
 .todo-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 16px 8px;
   background-color: transparent;
   border-bottom: 1px solid var(--border-color);
@@ -476,21 +470,30 @@ body {
 .sidebar-detail-view .todo-item:hover {
   background-color: var(--bg-color);
 }
+
 .todo-item.editing {
   background-color: var(--sidebar-bg);
   border: 1px solid var(--primary-color);
   border-radius: 12px;
   padding: 16px;
   margin: 8px 0;
+  justify-content: space-between;
 }
 
-.todo-content {
+.todo-meta {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.todo-body {
   flex: 1;
+  min-width: 0;
   cursor: pointer;
 }
+
 .edit-inputs {
   display: flex;
   gap: 8px;
@@ -538,6 +541,9 @@ body {
 .todo-text {
   font-size: 16px;
   color: var(--text-main);
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 .todo-item.done .todo-text {
   text-decoration: line-through;
@@ -548,9 +554,10 @@ body {
 .todo-actions {
   display: flex;
   gap: 6px;
-  margin-left: 12px;
+  margin-left: auto;
   opacity: 0;
   transition: opacity 0.2s;
+  flex-shrink: 0;
 }
 .todo-item:hover .todo-actions {
   opacity: 1;
@@ -594,6 +601,46 @@ body {
   border: 1px solid var(--border-color);
 }
 
+/* =========================================
+   ✅ 캘린더 뷰(사이드바) 전용 2줄 배치 레이아웃
+   1줄: [체크박스 + 날짜] ...... [수정][삭제]
+   2줄: [일정 텍스트 전체 폭]
+========================================= */
+.sidebar-detail-view .todo-item:not(.editing) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "meta actions"
+    "body body";
+  gap: 10px 8px;
+  padding: 14px 10px;
+}
+
+.sidebar-detail-view .todo-meta {
+  grid-area: meta;
+}
+
+.sidebar-detail-view .todo-actions {
+  grid-area: actions;
+  margin-left: 0;
+}
+
+.sidebar-detail-view .todo-body {
+  grid-area: body;
+  padding-left: 2px;
+}
+
+.sidebar-detail-view .todo-item.editing {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.sidebar-detail-view .todo-item.editing .todo-actions {
+  opacity: 1;
+  justify-content: flex-end;
+}
+
 .empty-state {
   text-align: center;
   padding: 40px 0;
@@ -602,7 +649,7 @@ body {
   line-height: 1.6;
 }
 
-/* 모바일 반응형 */
+/* 모바일 반응형 (모바일에서도 동일한 2줄 배치 적용) */
 @media (max-width: 768px) {
   html,
   body {
@@ -636,16 +683,35 @@ body {
     padding: 12px;
   }
 
-  .todo-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+  .todo-item:not(.editing) {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "meta actions"
+      "body body";
+    gap: 10px 8px;
+  }
+  .todo-meta {
+    grid-area: meta;
   }
   .todo-actions {
+    grid-area: actions;
     margin-left: 0;
-    width: 100%;
-    justify-content: flex-end;
     opacity: 1;
+  }
+  .todo-body {
+    grid-area: body;
+    padding-left: 2px;
+  }
+
+  .todo-item.editing {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .todo-item.editing .todo-actions {
+    opacity: 1;
+    justify-content: flex-end;
   }
   .edit-inputs {
     flex-direction: column;
