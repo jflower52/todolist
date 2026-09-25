@@ -1,20 +1,31 @@
 import { useState } from "react";
 import { useTodoStore } from "@/store/useTodoStore";
 
-export const TodoInput = () => {
-  const [inputText, setInputText] = useState("");
-  const [inputDate, setInputDate] = useState("");
+const CATEGORIES = ["업무", "공부", "개인", "약속", "중요", "기타"];
 
+export const TodoInput = () => {
   const addTodo = useTodoStore((state) => state.addTodo);
+  const selectedDate = useTodoStore((state) => state.selectedDate);
+
+  const [inputText, setInputText] = useState("");
+  const [inputDate, setInputDate] = useState(selectedDate || "");
+  const [category, setCategory] = useState("업무"); // 기본 선택값
+
+  const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
+
+  if (selectedDate !== prevSelectedDate) {
+    setPrevSelectedDate(selectedDate);
+    setInputDate(selectedDate || "");
+  }
 
   const handleAdd = () => {
     if (inputText.trim() === "" || inputDate === "") {
       alert("날짜와 일정 내용을 모두 입력해주세요!");
       return;
     }
-    addTodo(inputText, inputDate);
+    addTodo(inputText, inputDate, category);
     setInputText("");
-    setInputDate("");
+    setInputDate(selectedDate || "");
   };
 
   return (
@@ -25,7 +36,6 @@ export const TodoInput = () => {
           value={inputDate}
           onChange={(e) => setInputDate(e.target.value)}
           onClick={(e) => {
-            // 중괄호 안에 주석을 추가하여 Empty block 경고를 해결했습니다.
             try {
               e.target.showPicker();
             } catch {
@@ -39,6 +49,19 @@ export const TodoInput = () => {
           <span className="calendar-icon">📅</span>
         </div>
       </div>
+
+      {/* ✅ 카테고리 선택 드롭다운 */}
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="category-select"
+      >
+        {CATEGORIES.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
+      </select>
 
       <input
         type="text"

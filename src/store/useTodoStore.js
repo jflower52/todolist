@@ -8,18 +8,19 @@ export const useTodoStore = create(
       filter: "all",
       selectedDate: "",
       isDarkMode: false,
-      viewMode: "list", // 'list' (리스트 뷰) 또는 'calendar' (달력 뷰)
+      viewMode: "list",
 
       setFilter: (newFilter) => set({ filter: newFilter }),
       setSelectedDate: (dateStr) => set({ selectedDate: dateStr }),
       toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
-      setViewMode: (mode) => set({ viewMode: mode }), // 뷰 전환 함수
+      setViewMode: (mode) => set({ viewMode: mode }),
 
-      addTodo: (text, date) =>
+      // ✅ 카테고리(category) 추가 (기본값: '기타')
+      addTodo: (text, date, category = "기타") =>
         set((state) => ({
           todos: [
             ...state.todos,
-            { id: Date.now(), text, date, isDone: false },
+            { id: Date.now(), text, date, category, isDone: false },
           ],
         })),
 
@@ -35,10 +36,11 @@ export const useTodoStore = create(
           todos: state.todos.filter((todo) => todo.id !== id),
         })),
 
-      updateTodo: (id, text, date) =>
+      // ✅ 수정 시에도 카테고리 업데이트 반영
+      updateTodo: (id, text, date, category) =>
         set((state) => ({
           todos: state.todos.map((todo) =>
-            todo.id === id ? { ...todo, text, date } : todo,
+            todo.id === id ? { ...todo, text, date, category } : todo,
           ),
         })),
     }),

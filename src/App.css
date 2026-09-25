@@ -147,6 +147,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
 }
 .react-calendar {
   width: 100%;
@@ -222,7 +223,7 @@ body {
   background-color: var(--border-color);
 }
 
-/* --- 대형(Large) 달력 커스텀 --- */
+/* --- 대형(Large) 달력 커스텀 (글자 잘림 완벽 수정) --- */
 .large-calendar {
   border: 1px solid var(--border-color) !important;
   border-radius: 12px;
@@ -234,7 +235,7 @@ body {
   border-left: 1px solid var(--border-color);
 }
 .large-calendar .react-calendar__tile {
-  height: 120px;
+  height: 125px; /* 높이를 살짝 더 여유 있게 확보 */
   justify-content: flex-start;
   align-items: stretch;
   padding: 8px !important;
@@ -245,9 +246,10 @@ body {
 .large-calendar .react-calendar__tile > abbr {
   text-align: right;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 600;
   color: var(--text-muted);
+  font-size: 13px;
 }
 .large-calendar .react-calendar__tile--now {
   background: rgba(79, 70, 229, 0.05) !important;
@@ -261,33 +263,183 @@ body {
 .calendar-tasks-preview {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  overflow: hidden;
+  gap: 5px;
+  width: 100%;
 }
 .preview-task {
-  font-size: 11px;
-  background-color: var(--primary-color);
+  font-size: 12px;
+  line-height: 1.4; /* 글자 위아래가 잘리지 않도록 충분한 줄 높이 부여 */
   color: white;
-  padding: 4px 6px;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-  font-weight: 500;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 .preview-task.done {
-  background-color: transparent;
+  background-color: transparent !important;
   border: 1px solid var(--border-color);
-  color: var(--text-muted);
+  color: var(--text-muted) !important;
   text-decoration: line-through;
 }
+
+/* ✅ '+N개 더보기' 버튼 스타일 */
 .preview-more {
   font-size: 11px;
   color: var(--text-muted);
   text-align: center;
-  margin-top: 2px;
-  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background-color: rgba(107, 114, 128, 0.12);
+}
+.preview-more:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* =========================================
+   ✅ 플로팅 팝오버 (Popover) 카드 스타일
+========================================= */
+.calendar-popover {
+  position: fixed;
+  width: 280px;
+  max-height: 280px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popoverFadeIn 0.15s ease-out;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background-color: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.popover-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.popover-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.popover-close:hover {
+  background-color: var(--border-color);
+  color: var(--text-main);
+}
+
+.popover-list {
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popover-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.15s;
+}
+.popover-item:hover {
+  background-color: var(--sidebar-bg);
+}
+
+.popover-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.checkbox.small {
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+.popover-item.done .checkbox.small {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.category-badge.small {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.popover-text {
+  font-size: 13px;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+}
+.popover-item.done .popover-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.popover-del-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s;
+}
+.popover-item:hover .popover-del-btn {
+  opacity: 1;
+}
+.popover-del-btn:hover {
+  background-color: #ef4444;
+  color: white;
 }
 
 /* --- 등록 및 진행률 바 --- */
@@ -330,29 +482,29 @@ body {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- 커스텀 날짜 폼 --- */
+/* --- 커스텀 날짜 및 카테고리 폼 --- */
 .input-section {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 0;
   align-items: stretch;
 }
 
 .date-input-wrapper {
   position: relative;
-  width: 160px;
+  width: 155px;
   flex-shrink: 0;
 }
 
 .date-display {
   width: 100%;
   height: 100%;
-  padding: 12px 16px;
+  padding: 12px 14px;
   background-color: var(--surface-color);
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -371,6 +523,22 @@ body {
 }
 
 .hidden-date-input:focus + .date-display {
+  border-color: var(--primary-color);
+}
+
+.category-select {
+  background-color: var(--surface-color);
+  color: var(--text-main);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.category-select:focus {
   border-color: var(--primary-color);
 }
 
@@ -413,6 +581,9 @@ body {
   width: 100%;
   height: 45px;
 }
+.sidebar-detail-view .category-select {
+  width: 100%;
+}
 
 /* --- 필터 탭 --- */
 .filter-tabs {
@@ -445,7 +616,7 @@ body {
   background-color: var(--bg-color);
 }
 
-/* --- 리스트 아이템 (기본 리스트 뷰: 1줄 배치) --- */
+/* --- 리스트 아이템 --- */
 .todo-list {
   display: flex;
   flex-direction: column;
@@ -483,7 +654,7 @@ body {
 .todo-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -538,6 +709,70 @@ body {
   font-weight: 500;
   white-space: nowrap;
 }
+
+/* 6종 카테고리 뱃지 & 대형 캘린더 블록 컬러 */
+.category-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* 1. 업무 (Blue) */
+.category-badge.cat-업무 {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+.preview-task.cat-업무 {
+  background-color: #3b82f6;
+}
+
+/* 2. 공부 (Purple) */
+.category-badge.cat-공부 {
+  background-color: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+.preview-task.cat-공부 {
+  background-color: #8b5cf6;
+}
+
+/* 3. 개인 (Green) */
+.category-badge.cat-개인 {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+.preview-task.cat-개인 {
+  background-color: #10b981;
+}
+
+/* 4. 약속 (Orange) */
+.category-badge.cat-약속 {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+.preview-task.cat-약속 {
+  background-color: #f59e0b;
+}
+
+/* 5. 중요 (Red) */
+.category-badge.cat-중요 {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+.preview-task.cat-중요 {
+  background-color: #ef4444;
+}
+
+/* 6. 기타 (Gray) */
+.category-badge.cat-기타 {
+  background-color: rgba(107, 114, 128, 0.15);
+  color: #9ca3af;
+}
+.preview-task.cat-기타 {
+  background-color: #6b7280;
+}
+
 .todo-text {
   font-size: 16px;
   color: var(--text-main);
@@ -601,11 +836,7 @@ body {
   border: 1px solid var(--border-color);
 }
 
-/* =========================================
-   ✅ 캘린더 뷰(사이드바) 전용 2줄 배치 레이아웃
-   1줄: [체크박스 + 날짜] ...... [수정][삭제]
-   2줄: [일정 텍스트 전체 폭]
-========================================= */
+/* 캘린더 뷰(사이드바) 전용 2줄 배치 레이아웃 */
 .sidebar-detail-view .todo-item:not(.editing) {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -619,12 +850,10 @@ body {
 .sidebar-detail-view .todo-meta {
   grid-area: meta;
 }
-
 .sidebar-detail-view .todo-actions {
   grid-area: actions;
   margin-left: 0;
 }
-
 .sidebar-detail-view .todo-body {
   grid-area: body;
   padding-left: 2px;
@@ -635,7 +864,6 @@ body {
   align-items: stretch;
   gap: 12px;
 }
-
 .sidebar-detail-view .todo-item.editing .todo-actions {
   opacity: 1;
   justify-content: flex-end;
@@ -649,7 +877,7 @@ body {
   line-height: 1.6;
 }
 
-/* 모바일 반응형 (모바일에서도 동일한 2줄 배치 적용) */
+/* 모바일 반응형 */
 @media (max-width: 768px) {
   html,
   body {
@@ -677,6 +905,9 @@ body {
   .date-input-wrapper {
     width: 100%;
     height: 45px;
+  }
+  .category-select {
+    width: 100%;
   }
   .add-btn {
     width: 100%;
