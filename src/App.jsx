@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { Capacitor, registerPlugin } from "@capacitor/core";
+import {
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { auth, googleProvider } from "@/firebase";
 import { TodoInput } from "@/components/TodoInput";
 import { TodoList } from "@/components/TodoList";
@@ -8,6 +15,8 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTodoStore } from "@/store/useTodoStore";
 import "./App.css";
+
+const NativeGoogleAuth = registerPlugin("NativeGoogleAuth");
 
 const getTodayStr = () => {
   const today = new Date();
@@ -19,6 +28,7 @@ const getTodayStr = () => {
 const checkIsStandalone = () => {
   if (typeof window === "undefined") return false;
   return (
+    Capacitor.isNativePlatform() ||
     window.matchMedia("(display-mode: standalone)").matches ||
     window.navigator.standalone === true
   );
@@ -112,13 +122,21 @@ function App() {
     }
   }, [isDarkMode]);
 
+  // ✅ 스마트폰 앱에서는 안드로이드 네이티브 구글 로그인 실행, 웹에서는 팝업 실행
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      if (Capacitor.isNativePlatform()) {
+        const result = await NativeGoogleAuth.signIn();
+        const credential = GoogleAuthProvider.credential(result.idToken);
+        await signInWithCredential(auth, credential);
+      } else {
+        await signInWithPopup(auth, googleProvider);
+      }
     } catch (error) {
       console.error("구글 로그인 실패:", error);
       alert(
-        "로그인 중 문제가 발생했습니다. 파이어베이스에서 Google 로그인이 켜져 있는지 확인해주세요.",
+        "구글 로그인 중 문제가 발생했습니다.\n상세 내용: " +
+          (error?.message || "SHA-1 인증키 설정을 확인해주세요."),
       );
     }
   };

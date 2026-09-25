@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "299107853494",
+    "project_id": "todolist-ohj",
+    "storage_bucket": "todolist-ohj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:299107853494:android:dc9c2ddd282bc7205c7217",
+        "android_client_info": {
+          "package_name": "com.ohj.doneday"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "299107853494-ngshr9gp54puubuv2o42urnbfmg499f6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoa1gZwJ4VB8cNKIC-jQ_65ErrlrSivMM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "299107853494-ngshr9gp54puubuv2o42urnbfmg499f6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
