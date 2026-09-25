@@ -8,7 +8,7 @@ export const TodoList = () => {
   const searchQuery = useTodoStore((state) => state.searchQuery);
   const selectedDate = useTodoStore((state) => state.selectedDate);
 
-  // 1. 다중 조건 필터링 (날짜 + 상태 + 카테고리 + 검색어)
+  // 1. 다중 조건 필터링
   const filteredTodos = todos.filter((todo) => {
     const matchesDate = !selectedDate || todo.date === selectedDate;
 
@@ -30,14 +30,23 @@ export const TodoList = () => {
     return matchesDate && matchesStatus && matchesCategory && matchesSearch;
   });
 
-  // 2. 스마트 자동 정렬 (미완료 항목 상단 유지 -> 날짜 오름차순 -> 등록순)
+  // 2. 스마트 자동 정렬 (미완료 우선 -> ⭐상단 고정 우선 -> 날짜순 -> 등록순)
   const sortedTodos = [...filteredTodos].sort((a, b) => {
+    // (1) 완료된 항목은 무조건 아래로
     if (a.isDone !== b.isDone) {
-      return a.isDone ? 1 : -1; // 완료된 항목은 아래로 내림
+      return a.isDone ? 1 : -1;
     }
+    // (2) 상단 고정(isPinned)된 항목을 최상단으로
+    const pinA = Boolean(a.isPinned);
+    const pinB = Boolean(b.isPinned);
+    if (pinA !== pinB) {
+      return pinA ? -1 : 1;
+    }
+    // (3) 날짜가 빠른 순
     if (a.date !== b.date) {
-      return a.date.localeCompare(b.date); // 날짜가 빠른 순으로 정렬
+      return a.date.localeCompare(b.date);
     }
+    // (4) 등록된 순
     return a.id - b.id;
   });
 

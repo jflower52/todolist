@@ -738,6 +738,14 @@ body {
   background-color: var(--bg-color);
 }
 
+/* ✅ 상단 고정(Pinned)된 아이템 강조 스타일 */
+.todo-item.pinned:not(.done) {
+  background-color: rgba(245, 158, 11, 0.06);
+  border-left: 3px solid #f59e0b;
+  border-radius: 6px;
+  padding-left: 10px;
+}
+
 .todo-item.editing {
   background-color: var(--sidebar-bg);
   border: 1px solid var(--primary-color);
@@ -756,7 +764,28 @@ body {
   flex-wrap: wrap;
 }
 
-/* ✅ 카테고리와 D-Day를 세트로 묶어주는 컨테이너 */
+/* ✅ 별표(상단 고정) 버튼 스타일 */
+.pin-btn {
+  background: transparent;
+  border: none;
+  padding: 0 2px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
+  flex-shrink: 0;
+}
+.pin-btn:hover {
+  transform: scale(1.2);
+  color: #f59e0b;
+}
+.pin-btn.active {
+  color: #f59e0b;
+}
+
 .todo-badges {
   display: inline-flex;
   align-items: center;

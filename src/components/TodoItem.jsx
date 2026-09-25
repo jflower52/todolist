@@ -3,7 +3,6 @@ import { useTodoStore } from "@/store/useTodoStore";
 
 const CATEGORIES = ["업무", "공부", "개인", "약속", "중요", "기타"];
 
-// 오늘 날짜와 비교하여 D-Day 텍스트와 스타일 클래스를 반환하는 함수
 const getDdayInfo = (dateString, isDone) => {
   if (!dateString || isDone) return null;
 
@@ -22,13 +21,13 @@ const getDdayInfo = (dateString, isDone) => {
   } else if (diffDays > 0) {
     return { text: `D-${diffDays}`, type: "upcoming" };
   } else {
-    // ✅ '지연 +N' 대신 깔끔한 'D+N' 형태로 변경
     return { text: `D+${Math.abs(diffDays)}`, type: "overdue" };
   }
 };
 
 export const TodoItem = ({ todo }) => {
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
+  const togglePin = useTodoStore((state) => state.togglePin);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const updateTodo = useTodoStore((state) => state.updateTodo);
 
@@ -109,9 +108,24 @@ export const TodoItem = ({ todo }) => {
   }
 
   return (
-    <li className={`todo-item ${todo.isDone ? "done" : ""}`}>
-      {/* 상단 좌측: 체크박스, 날짜, [카테고리 + D-Day 뱃지 묶음] */}
+    <li
+      className={`todo-item ${todo.isDone ? "done" : ""} ${todo.isPinned ? "pinned" : ""}`}
+    >
+      {/* 상단 좌측: ⭐고정 버튼, 체크박스, 날짜, [카테고리 + D-Day 뱃지 묶음] */}
       <div onClick={() => toggleTodo(todo.id)} className="todo-meta">
+        {/* ✅ 상단 고정(별표) 버튼 */}
+        <button
+          type="button"
+          className={`pin-btn ${todo.isPinned ? "active" : ""}`}
+          onClick={(e) => {
+            e.stopPropagation(); // 완료 체크가 동시에 눌리지 않도록 방지
+            togglePin(todo.id);
+          }}
+          title={todo.isPinned ? "상단 고정 해제" : "상단 고정"}
+        >
+          {todo.isPinned ? "★" : "☆"}
+        </button>
+
         <div className="checkbox">✔</div>
         <span
           className={`todo-date-badge ${ddayInfo?.type === "overdue" ? "overdue-text" : ""}`}
@@ -119,7 +133,6 @@ export const TodoItem = ({ todo }) => {
           {todo.date}
         </span>
 
-        {/* ✅ 카테고리 오른쪽에 D-Day가 항상 나란히 붙어 있도록 그룹화 */}
         <div className="todo-badges">
           <span className={`category-badge cat-${currentCategory}`}>
             {currentCategory}

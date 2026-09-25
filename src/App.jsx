@@ -32,6 +32,15 @@ function App() {
   const viewMode = useTodoStore((state) => state.viewMode);
   const setViewMode = useTodoStore((state) => state.setViewMode);
 
+  const subscribeToTodos = useTodoStore((state) => state.subscribeToTodos);
+  const isCloudSynced = useTodoStore((state) => state.isCloudSynced);
+
+  // ✅ 앱 시작 시 파이어베이스 실시간 동기화 연결
+  useEffect(() => {
+    const unsubscribe = subscribeToTodos();
+    return () => unsubscribe();
+  }, [subscribeToTodos]);
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.setAttribute("data-theme", "dark");
@@ -40,15 +49,12 @@ function App() {
     }
   }, [isDarkMode]);
 
-  // 현재 선택된 날짜(또는 전체) 기준으로 완료된 일정 개수 계산
   const completedCount = todos.filter((todo) =>
     selectedDate ? todo.date === selectedDate && todo.isDone : todo.isDone,
   ).length;
 
-  // 리스트 컨트롤 영역 (검색창 + 카테고리 필터 + 상태 탭 + 완료 비우기)
   const renderListControls = () => (
     <div className="list-controls">
-      {/* 🔍 실시간 검색창 */}
       <div className="search-bar-wrapper">
         <span className="search-icon">🔍</span>
         <input
@@ -69,7 +75,6 @@ function App() {
         )}
       </div>
 
-      {/* 🏷️ 카테고리별 필터 칩 */}
       <div className="category-filter-chips">
         {FILTER_CATEGORIES.map((cat) => (
           <button
@@ -82,7 +87,6 @@ function App() {
         ))}
       </div>
 
-      {/* 📋 상태 탭 & 🗑️ 완료 항목 일괄 삭제 버튼 */}
       <div className="filter-tabs-row">
         <div className="filter-tabs">
           <button
@@ -119,7 +123,20 @@ function App() {
       {/* ⬅️ 왼쪽 사이드바 */}
       <aside className="app-sidebar">
         <div className="sidebar-header">
-          <h1>📅 나의 일정</h1>
+          <div>
+            <h1>📅 나의 일정</h1>
+            <span
+              style={{
+                fontSize: "11px",
+                color: isCloudSynced ? "#10b981" : "var(--text-muted)",
+                fontWeight: 600,
+              }}
+            >
+              {isCloudSynced
+                ? "☁️ 클라우드 실시간 연동 중"
+                : "⏳ 클라우드 연결 중..."}
+            </span>
+          </div>
           <ThemeToggle />
         </div>
 
