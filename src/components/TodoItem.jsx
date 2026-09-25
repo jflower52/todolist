@@ -3,12 +3,37 @@ import { useTodoStore } from "@/store/useTodoStore";
 
 const CATEGORIES = ["업무", "공부", "개인", "약속", "중요", "기타"];
 
+// 오늘 날짜와 비교하여 D-Day 텍스트와 스타일 클래스를 반환하는 함수
+const getDdayInfo = (dateString, isDone) => {
+  if (!dateString || isDone) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [year, month, day] = dateString.split("-").map(Number);
+  const targetDate = new Date(year, month - 1, day);
+  targetDate.setHours(0, 0, 0, 0);
+
+  const diffTime = targetDate.getTime() - today.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return { text: "D-Day", type: "today" };
+  } else if (diffDays > 0) {
+    return { text: `D-${diffDays}`, type: "upcoming" };
+  } else {
+    // ✅ '지연 +N' 대신 깔끔한 'D+N' 형태로 변경
+    return { text: `D+${Math.abs(diffDays)}`, type: "overdue" };
+  }
+};
+
 export const TodoItem = ({ todo }) => {
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const updateTodo = useTodoStore((state) => state.updateTodo);
 
   const currentCategory = todo.category || "기타";
+  const ddayInfo = getDdayInfo(todo.date, todo.isDone);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(todo.text);
@@ -85,13 +110,26 @@ export const TodoItem = ({ todo }) => {
 
   return (
     <li className={`todo-item ${todo.isDone ? "done" : ""}`}>
-      {/* 상단 좌측: 체크박스, 날짜, 카테고리 뱃지 */}
+      {/* 상단 좌측: 체크박스, 날짜, [카테고리 + D-Day 뱃지 묶음] */}
       <div onClick={() => toggleTodo(todo.id)} className="todo-meta">
         <div className="checkbox">✔</div>
-        <span className="todo-date-badge">{todo.date}</span>
-        <span className={`category-badge cat-${currentCategory}`}>
-          {currentCategory}
+        <span
+          className={`todo-date-badge ${ddayInfo?.type === "overdue" ? "overdue-text" : ""}`}
+        >
+          {todo.date}
         </span>
+
+        {/* ✅ 카테고리 오른쪽에 D-Day가 항상 나란히 붙어 있도록 그룹화 */}
+        <div className="todo-badges">
+          <span className={`category-badge cat-${currentCategory}`}>
+            {currentCategory}
+          </span>
+          {ddayInfo && (
+            <span className={`dday-badge dday-${ddayInfo.type}`}>
+              {ddayInfo.text}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 본문: 일정 텍스트 */}

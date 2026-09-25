@@ -223,7 +223,7 @@ body {
   background-color: var(--border-color);
 }
 
-/* --- 대형(Large) 달력 커스텀 (글자 잘림 완벽 수정) --- */
+/* --- 대형(Large) 달력 커스텀 --- */
 .large-calendar {
   border: 1px solid var(--border-color) !important;
   border-radius: 12px;
@@ -235,7 +235,7 @@ body {
   border-left: 1px solid var(--border-color);
 }
 .large-calendar .react-calendar__tile {
-  height: 125px; /* 높이를 살짝 더 여유 있게 확보 */
+  height: 125px;
   justify-content: flex-start;
   align-items: stretch;
   padding: 8px !important;
@@ -268,7 +268,7 @@ body {
 }
 .preview-task {
   font-size: 12px;
-  line-height: 1.4; /* 글자 위아래가 잘리지 않도록 충분한 줄 높이 부여 */
+  line-height: 1.4;
   color: white;
   padding: 3px 8px;
   border-radius: 5px;
@@ -286,7 +286,6 @@ body {
   text-decoration: line-through;
 }
 
-/* ✅ '+N개 더보기' 버튼 스타일 */
 .preview-more {
   font-size: 11px;
   color: var(--text-muted);
@@ -303,9 +302,7 @@ body {
   color: white;
 }
 
-/* =========================================
-   ✅ 플로팅 팝오버 (Popover) 카드 스타일
-========================================= */
+/* --- 플로팅 팝오버 (Popover) 카드 스타일 --- */
 .calendar-popover {
   position: fixed;
   width: 280px;
@@ -444,7 +441,7 @@ body {
 
 /* --- 등록 및 진행률 바 --- */
 .registration-section {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 .progress-section {
   margin-bottom: 24px;
@@ -521,7 +518,6 @@ body {
   cursor: pointer;
   z-index: 10;
 }
-
 .hidden-date-input:focus + .date-display {
   border-color: var(--primary-color);
 }
@@ -585,17 +581,98 @@ body {
   width: 100%;
 }
 
-/* --- 필터 탭 --- */
+/* --- 검색창 & 카테고리 칩 & 일괄 삭제 --- */
+.list-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search-bar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 14px;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 36px 10px 38px;
+  background-color: var(--sidebar-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.sidebar-detail-view .search-input {
+  background-color: var(--surface-color);
+}
+.search-input:focus {
+  border-color: var(--primary-color);
+}
+.search-clear-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px;
+}
+.search-clear-btn:hover {
+  color: var(--text-main);
+}
+
+.category-filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chip-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip-btn:hover {
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+.chip-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.filter-tabs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 12px;
+}
 .filter-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 6px;
   flex-wrap: wrap;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 16px;
 }
 .filter-tabs button {
-  padding: 8px 16px;
+  padding: 7px 14px;
   border: 1px solid transparent;
   background-color: transparent;
   color: var(--text-muted);
@@ -603,6 +680,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 13px;
 }
 .filter-tabs button:hover {
   color: var(--text-main);
@@ -614,6 +692,24 @@ body {
 }
 .sidebar-detail-view .filter-tabs button.active {
   background-color: var(--bg-color);
+}
+
+.clear-completed-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.clear-completed-btn:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
 }
 
 /* --- 리스트 아이템 --- */
@@ -654,9 +750,17 @@ body {
 .todo-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ✅ 카테고리와 D-Day를 세트로 묶어주는 컨테이너 */
+.todo-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .todo-body {
@@ -709,6 +813,37 @@ body {
   font-weight: 500;
   white-space: nowrap;
 }
+.todo-date-badge.overdue-text {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* D-Day 뱃지 스타일 */
+.dday-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+}
+
+.dday-badge.dday-today {
+  background-color: #f59e0b;
+  color: #ffffff;
+}
+
+.dday-badge.dday-upcoming {
+  background-color: rgba(99, 102, 241, 0.14);
+  color: var(--primary-color);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.dday-badge.dday-overdue {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
 
 /* 6종 카테고리 뱃지 & 대형 캘린더 블록 컬러 */
 .category-badge {
@@ -718,8 +853,6 @@ body {
   border-radius: 6px;
   white-space: nowrap;
 }
-
-/* 1. 업무 (Blue) */
 .category-badge.cat-업무 {
   background-color: rgba(59, 130, 246, 0.15);
   color: #3b82f6;
@@ -728,7 +861,6 @@ body {
   background-color: #3b82f6;
 }
 
-/* 2. 공부 (Purple) */
 .category-badge.cat-공부 {
   background-color: rgba(139, 92, 246, 0.15);
   color: #8b5cf6;
@@ -737,7 +869,6 @@ body {
   background-color: #8b5cf6;
 }
 
-/* 3. 개인 (Green) */
 .category-badge.cat-개인 {
   background-color: rgba(16, 185, 129, 0.15);
   color: #10b981;
@@ -746,7 +877,6 @@ body {
   background-color: #10b981;
 }
 
-/* 4. 약속 (Orange) */
 .category-badge.cat-약속 {
   background-color: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
@@ -755,7 +885,6 @@ body {
   background-color: #f59e0b;
 }
 
-/* 5. 중요 (Red) */
 .category-badge.cat-중요 {
   background-color: rgba(239, 68, 68, 0.15);
   color: #ef4444;
@@ -764,7 +893,6 @@ body {
   background-color: #ef4444;
 }
 
-/* 6. 기타 (Gray) */
 .category-badge.cat-기타 {
   background-color: rgba(107, 114, 128, 0.15);
   color: #9ca3af;
@@ -846,7 +974,6 @@ body {
   gap: 10px 8px;
   padding: 14px 10px;
 }
-
 .sidebar-detail-view .todo-meta {
   grid-area: meta;
 }

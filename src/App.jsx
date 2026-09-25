@@ -7,13 +7,28 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTodoStore } from "@/store/useTodoStore";
 import "./App.css";
 
+const FILTER_CATEGORIES = [
+  "전체",
+  "업무",
+  "공부",
+  "개인",
+  "약속",
+  "중요",
+  "기타",
+];
+
 function App() {
+  const todos = useTodoStore((state) => state.todos);
   const filter = useTodoStore((state) => state.filter);
   const setFilter = useTodoStore((state) => state.setFilter);
+  const categoryFilter = useTodoStore((state) => state.categoryFilter);
+  const setCategoryFilter = useTodoStore((state) => state.setCategoryFilter);
+  const searchQuery = useTodoStore((state) => state.searchQuery);
+  const setSearchQuery = useTodoStore((state) => state.setSearchQuery);
+  const clearCompleted = useTodoStore((state) => state.clearCompleted);
+
   const selectedDate = useTodoStore((state) => state.selectedDate);
   const isDarkMode = useTodoStore((state) => state.isDarkMode);
-
-  // 새로 추가된 뷰 모드 가져오기
   const viewMode = useTodoStore((state) => state.viewMode);
   const setViewMode = useTodoStore((state) => state.setViewMode);
 
@@ -25,6 +40,80 @@ function App() {
     }
   }, [isDarkMode]);
 
+  // 현재 선택된 날짜(또는 전체) 기준으로 완료된 일정 개수 계산
+  const completedCount = todos.filter((todo) =>
+    selectedDate ? todo.date === selectedDate && todo.isDone : todo.isDone,
+  ).length;
+
+  // 리스트 컨트롤 영역 (검색창 + 카테고리 필터 + 상태 탭 + 완료 비우기)
+  const renderListControls = () => (
+    <div className="list-controls">
+      {/* 🔍 실시간 검색창 */}
+      <div className="search-bar-wrapper">
+        <span className="search-icon">🔍</span>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="일정 키워드 검색..."
+          className="search-input"
+        />
+        {searchQuery && (
+          <button
+            className="search-clear-btn"
+            onClick={() => setSearchQuery("")}
+            title="검색어 지우기"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* 🏷️ 카테고리별 필터 칩 */}
+      <div className="category-filter-chips">
+        {FILTER_CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            className={`chip-btn ${categoryFilter === cat ? "active" : ""}`}
+            onClick={() => setCategoryFilter(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* 📋 상태 탭 & 🗑️ 완료 항목 일괄 삭제 버튼 */}
+      <div className="filter-tabs-row">
+        <div className="filter-tabs">
+          <button
+            className={filter === "all" ? "active" : ""}
+            onClick={() => setFilter("all")}
+          >
+            전체
+          </button>
+          <button
+            className={filter === "active" ? "active" : ""}
+            onClick={() => setFilter("active")}
+          >
+            진행 중
+          </button>
+          <button
+            className={filter === "completed" ? "active" : ""}
+            onClick={() => setFilter("completed")}
+          >
+            완료
+          </button>
+        </div>
+
+        {completedCount > 0 && (
+          <button className="clear-completed-btn" onClick={clearCompleted}>
+            🗑️ 완료 비우기 ({completedCount})
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="app-container">
       {/* ⬅️ 왼쪽 사이드바 */}
@@ -34,7 +123,6 @@ function App() {
           <ThemeToggle />
         </div>
 
-        {/* 보기 모드 전환 스위치 */}
         <div className="view-toggle-group">
           <button
             className={viewMode === "list" ? "active" : ""}
@@ -57,7 +145,6 @@ function App() {
               <CalendarWidget isLarge={false} />
             </>
           ) : (
-            // 캘린더 뷰일 때의 사이드바 (해당 날짜 상세 패널)
             <div className="sidebar-detail-view">
               <h2 className="menu-title">
                 {selectedDate ? `${selectedDate} 상세` : "날짜를 선택해주세요"}
@@ -66,25 +153,8 @@ function App() {
                 <>
                   <ProgressBar />
                   <TodoInput />
-                  <div className="filter-tabs" style={{ marginTop: "24px" }}>
-                    <button
-                      className={filter === "all" ? "active" : ""}
-                      onClick={() => setFilter("all")}
-                    >
-                      전체
-                    </button>
-                    <button
-                      className={filter === "active" ? "active" : ""}
-                      onClick={() => setFilter("active")}
-                    >
-                      진행 중
-                    </button>
-                    <button
-                      className={filter === "completed" ? "active" : ""}
-                      onClick={() => setFilter("completed")}
-                    >
-                      완료
-                    </button>
+                  <div style={{ marginTop: "24px" }}>
+                    {renderListControls()}
                   </div>
                   <TodoList />
                 </>
@@ -113,32 +183,12 @@ function App() {
                 <TodoInput />
               </section>
               <section className="list-section">
-                <div className="filter-tabs">
-                  <button
-                    className={filter === "all" ? "active" : ""}
-                    onClick={() => setFilter("all")}
-                  >
-                    전체
-                  </button>
-                  <button
-                    className={filter === "active" ? "active" : ""}
-                    onClick={() => setFilter("active")}
-                  >
-                    진행 중
-                  </button>
-                  <button
-                    className={filter === "completed" ? "active" : ""}
-                    onClick={() => setFilter("completed")}
-                  >
-                    완료
-                  </button>
-                </div>
+                {renderListControls()}
                 <TodoList />
               </section>
             </div>
           </>
         ) : (
-          // 캘린더 뷰일 때의 메인 영역 (대형 달력)
           <>
             <div className="main-header" style={{ maxWidth: "100%" }}>
               <h2>📆 월간 캘린더</h2>
