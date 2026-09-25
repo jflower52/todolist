@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Preferences } from "@capacitor/preferences";
 import {
   collection,
   doc,
@@ -19,10 +20,39 @@ export const DEFAULT_CATEGORIES = [
   { name: "기타", color: "#6b7280" },
 ];
 
+// ✅ 스마트폰 바탕화면 위젯으로 오늘 할 일 데이터 동기화
+const syncToNativeWidget = async (todos) => {
+  try {
+    const today = new Date();
+    const offset = today.getTimezoneOffset() * 60000;
+    const todayStr = new Date(today.getTime() - offset)
+      .toISOString()
+      .split("T")[0];
+
+    const todayTodos = todos.filter((t) => t.date === todayStr);
+    const remainingToday = todayTodos.filter((t) => !t.isDone);
+    const totalRemaining = todos.filter((t) => !t.isDone).length;
+
+    const statsText = `오늘 남은 일 ${remainingToday.length}건  |  전체 할 일 ${totalRemaining}건`;
+    const listText =
+      remainingToday.length > 0
+        ? remainingToday
+            .slice(0, 5)
+            .map((t) => `• [${t.category || "기타"}] ${t.text}`)
+            .join("\n")
+        : "🎉 오늘 예정된 할 일을 모두 끝냈거나 등록된 일정이 없습니다!";
+
+    await Preferences.set({ key: "widget_today_stats", value: statsText });
+    await Preferences.set({ key: "widget_today_list", value: listText });
+  } catch {
+    // 웹 브라우저 환경에서는 무시
+  }
+};
+
 export const useTodoStore = create(
   persist(
     (set, get) => ({
-      user: null, // ✅ 현재 로그인한 사용자 정보
+      user: null,
       todos: [],
       categories: DEFAULT_CATEGORIES,
       filter: "all",
@@ -34,13 +64,15 @@ export const useTodoStore = create(
       isCloudSynced: false,
 
       setUser: (user) => set({ user }),
-      clearUserData: () =>
+      clearUserData: () => {
+        syncToNativeWidget([]);
         set({
           user: null,
           todos: [],
           categories: DEFAULT_CATEGORIES,
           isCloudSynced: false,
-        }),
+        });
+      },
 
       setFilter: (newFilter) => set({ filter: newFilter }),
       setCategoryFilter: (cat) => set({ categoryFilter: cat }),
@@ -49,7 +81,6 @@ export const useTodoStore = create(
       toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
       setViewMode: (mode) => set({ viewMode: mode }),
 
-      // ✅ 개인별 커스텀 태그 추가
       addCategory: async (name, color) => {
         const uid = get().user?.uid;
         if (!uid) return;
@@ -66,7 +97,6 @@ export const useTodoStore = create(
         });
       },
 
-      // ✅ 개인별 커스텀 태그 삭제
       deleteCategory: async (name) => {
         const uid = get().user?.uid;
         if (!uid) return;
@@ -80,7 +110,6 @@ export const useTodoStore = create(
         });
       },
 
-      // ✅ 로그인한 사용자(uid) 전용 실시간 동기화
       subscribeToUserTodos: (uid) => {
         if (!uid) return () => {};
 
@@ -90,7 +119,6 @@ export const useTodoStore = create(
         const unsubTodos = onSnapshot(
           colRef,
           async (snapshot) => {
-            // 첫 로그인 시 개인 클라우드가 비어있고 기존에 작성한 일정이 있다면 자동 이전
             if (
               snapshot.empty &&
               get().todos.length > 0 &&
@@ -108,6 +136,7 @@ export const useTodoStore = create(
 
             const cloudTodos = snapshot.docs.map((docSnap) => docSnap.data());
             set({ todos: cloudTodos, isCloudSynced: true });
+            syncToNativeWidget(cloudTodos);
           },
           (error) => {
             console.error("Firebase 개인 일정 연동 오류:", error);
@@ -146,7 +175,9 @@ export const useTodoStore = create(
           isDone: false,
           isPinned: false,
         };
-        set((state) => ({ todos: [...state.todos, newTodo] }));
+        const nextTodos = [...get().todos, newTodo];
+        set({ todos: nextTodos });
+        syncToNativeWidget(nextTodos);
         await setDoc(
           doc(db, "users", uid, "todos", String(newTodo.id)),
           newTodo,
@@ -161,9 +192,11 @@ export const useTodoStore = create(
         if (!target) return;
         const updated = { ...target, isDone: !target.isDone };
 
-        set((state) => ({
-          todos: state.todos.map((todo) => (todo.id === id ? updated : todo)),
-        }));
+        const nextTodos = get().todos.map((todo) =>
+          todo.id === id ? updated : todo,
+        );
+        set({ todos: nextTodos });
+        syncToNativeWidget(nextTodos);
         await setDoc(doc(db, "users", uid, "todos", String(id)), updated);
       },
 
@@ -175,9 +208,11 @@ export const useTodoStore = create(
         if (!target) return;
         const updated = { ...target, isPinned: !target.isPinned };
 
-        set((state) => ({
-          todos: state.todos.map((todo) => (todo.id === id ? updated : todo)),
-        }));
+        const nextTodos = get().todos.map((todo) =>
+          todo.id === id ? updated : todo,
+        );
+        set({ todos: nextTodos });
+        syncToNativeWidget(nextTodos);
         await setDoc(doc(db, "users", uid, "todos", String(id)), updated);
       },
 
@@ -185,9 +220,9 @@ export const useTodoStore = create(
         const uid = get().user?.uid;
         if (!uid) return;
 
-        set((state) => ({
-          todos: state.todos.filter((todo) => todo.id !== id),
-        }));
+        const nextTodos = get().todos.filter((todo) => todo.id !== id);
+        set({ todos: nextTodos });
+        syncToNativeWidget(nextTodos);
         await deleteDoc(doc(db, "users", uid, "todos", String(id)));
       },
 
@@ -205,9 +240,11 @@ export const useTodoStore = create(
           categoryColor: categoryColor || target.categoryColor || "#6b7280",
         };
 
-        set((state) => ({
-          todos: state.todos.map((todo) => (todo.id === id ? updated : todo)),
-        }));
+        const nextTodos = get().todos.map((todo) =>
+          todo.id === id ? updated : todo,
+        );
+        set({ todos: nextTodos });
+        syncToNativeWidget(nextTodos);
         await setDoc(doc(db, "users", uid, "todos", String(id)), updated);
       },
 
@@ -222,12 +259,12 @@ export const useTodoStore = create(
             : todo.isDone,
         );
 
-        set((state) => ({
-          todos: state.todos.filter((todo) => {
-            if (selectedDate && todo.date !== selectedDate) return true;
-            return !todo.isDone;
-          }),
-        }));
+        const nextTodos = get().todos.filter((todo) => {
+          if (selectedDate && todo.date !== selectedDate) return true;
+          return !todo.isDone;
+        });
+        set({ todos: nextTodos });
+        syncToNativeWidget(nextTodos);
 
         const batch = writeBatch(db);
         toDelete.forEach((todo) => {

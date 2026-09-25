@@ -168,7 +168,7 @@ function App() {
             <span className="auth-logo">📅</span>
             <ThemeToggle />
           </div>
-          <h1 className="auth-title">나의 일정 플래너</h1>
+          <h1 className="auth-title">던데이 (DoneDay)</h1>
           <p className="auth-desc">
             구글 계정으로 로그인하면 나만의 개인 캘린더와 할 일 목록이
             <br />
@@ -298,7 +298,7 @@ function App() {
       <aside className="app-sidebar">
         <div className="sidebar-header">
           <div>
-            <h1>📅 나의 일정</h1>
+            <h1>📅 던데이</h1>
             <span
               style={{
                 fontSize: "11px",

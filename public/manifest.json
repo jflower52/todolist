@@ -1,6 +1,6 @@
 {
-  "name": "나의 일정 플래너",
-  "short_name": "나의 일정",
+  "name": "던데이 (DoneDay)",
+  "short_name": "던데이",
   "description": "클라우드 실시간 연동 개인 일정 플래너",
   "start_url": "/",
   "display": "standalone",
