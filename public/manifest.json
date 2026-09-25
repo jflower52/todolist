@@ -1,0 +1,17 @@
+{
+  "name": "나의 일정 플래너",
+  "short_name": "나의 일정",
+  "description": "클라우드 실시간 연동 개인 일정 플래너",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

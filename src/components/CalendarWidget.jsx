@@ -7,10 +7,10 @@ export const CalendarWidget = ({ isLarge = false }) => {
   const selectedDate = useTodoStore((state) => state.selectedDate);
   const setSelectedDate = useTodoStore((state) => state.setSelectedDate);
   const todos = useTodoStore((state) => state.todos);
+  const categories = useTodoStore((state) => state.categories);
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
 
-  // ✅ 플로팅 팝오버 상태 (열린 날짜, 띄울 화면 좌표)
   const [popover, setPopover] = useState({
     isOpen: false,
     date: "",
@@ -18,7 +18,13 @@ export const CalendarWidget = ({ isLarge = false }) => {
     y: 0,
   });
 
-  // 팝오버 바깥 영역 클릭 시 자동으로 닫기
+  // 태그 이름에 맞는 커스텀 색상 반환 헬퍼
+  const getTagColor = (todo) => {
+    const catName = todo.category || "기타";
+    const matched = categories.find((c) => c.name === catName);
+    return matched?.color || todo.categoryColor || "#6b7280";
+  };
+
   useEffect(() => {
     const handleClickOutside = () => {
       if (popover.isOpen) {
@@ -37,16 +43,14 @@ export const CalendarWidget = ({ isLarge = false }) => {
     setSelectedDate(formattedDate);
   };
 
-  // ✅ '+N개 더보기' 클릭 시 실행되는 함수
   const handleMoreClick = (e, formattedDate) => {
-    e.stopPropagation(); // 부모 이벤트를 막아 팝오버가 즉시 닫히는 현상 방지
-    setSelectedDate(formattedDate); // 좌측 사이드바도 해당 날짜로 동기화
+    e.stopPropagation();
+    setSelectedDate(formattedDate);
 
     const rect = e.currentTarget.getBoundingClientRect();
     const popWidth = 280;
     const popHeight = 260;
 
-    // 화면 오른쪽이나 아래쪽 끝을 넘어가지 않도록 스마트하게 위치 보정
     let x = rect.left;
     let y = rect.bottom + 6;
 
@@ -54,7 +58,7 @@ export const CalendarWidget = ({ isLarge = false }) => {
       x = window.innerWidth - popWidth - 20;
     }
     if (y + popHeight > window.innerHeight - 20) {
-      y = rect.top - popHeight - 6; // 아래 공간이 부족하면 위쪽으로 띄움
+      y = rect.top - popHeight - 6;
     }
 
     setPopover({
@@ -78,19 +82,18 @@ export const CalendarWidget = ({ isLarge = false }) => {
       if (isLarge) {
         return (
           <div className="calendar-tasks-preview">
-            {/* ✅ 글자 잘림 방지를 위해 칸 안에는 최대 2개까지만 여유 있게 표시 */}
             {dayTodos.slice(0, 2).map((todo) => {
-              const cat = todo.category || "기타";
+              const color = getTagColor(todo);
               return (
                 <div
                   key={todo.id}
-                  className={`preview-task cat-${cat} ${todo.isDone ? "done" : ""}`}
+                  className={`preview-task ${todo.isDone ? "done" : ""}`}
+                  style={!todo.isDone ? { backgroundColor: color } : undefined}
                 >
                   {todo.text}
                 </div>
               );
             })}
-            {/* ✅ 3개 이상일 때 '+N개 더보기' 버튼 표시 */}
             {dayTodos.length > 2 && (
               <div
                 className="preview-more"
@@ -112,7 +115,6 @@ export const CalendarWidget = ({ isLarge = false }) => {
     return null;
   };
 
-  // 현재 팝오버에 표시할 해당 날짜의 일정 목록
   const popoverTodos = popover.date
     ? todos.filter((t) => t.date === popover.date)
     : [];
@@ -135,12 +137,11 @@ export const CalendarWidget = ({ isLarge = false }) => {
         </button>
       )}
 
-      {/* ✅ 구글 캘린더 스타일 플로팅 팝오버(Popover) 창 */}
       {isLarge && popover.isOpen && (
         <div
           className="calendar-popover"
           style={{ top: `${popover.y}px`, left: `${popover.x}px` }}
-          onClick={(e) => e.stopPropagation()} // 팝오버 내부 클릭 시 닫히지 않게 보호
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="popover-header">
             <span className="popover-date">
@@ -157,6 +158,7 @@ export const CalendarWidget = ({ isLarge = false }) => {
           <div className="popover-list">
             {popoverTodos.map((todo) => {
               const cat = todo.category || "기타";
+              const color = getTagColor(todo);
               return (
                 <div
                   key={todo.id}
@@ -167,7 +169,14 @@ export const CalendarWidget = ({ isLarge = false }) => {
                     onClick={() => toggleTodo(todo.id)}
                   >
                     <div className="checkbox small">✔</div>
-                    <span className={`category-badge small cat-${cat}`}>
+                    <span
+                      className="category-badge small"
+                      style={{
+                        backgroundColor: `${color}24`,
+                        color: color,
+                        border: `1px solid ${color}40`,
+                      }}
+                    >
                       {cat}
                     </span>
                     <span className="popover-text">{todo.text}</span>

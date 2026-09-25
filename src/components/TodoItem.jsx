@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTodoStore } from "@/store/useTodoStore";
-
-const CATEGORIES = ["업무", "공부", "개인", "약속", "중요", "기타"];
+import { TagSelector } from "./TagSelector";
 
 const getDdayInfo = (dateString, isDone) => {
   if (!dateString || isDone) return null;
@@ -26,25 +25,30 @@ const getDdayInfo = (dateString, isDone) => {
 };
 
 export const TodoItem = ({ todo }) => {
+  const categories = useTodoStore((state) => state.categories);
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
   const togglePin = useTodoStore((state) => state.togglePin);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const updateTodo = useTodoStore((state) => state.updateTodo);
 
   const currentCategory = todo.category || "기타";
+  const matchedCat = categories.find((c) => c.name === currentCategory);
+  const tagColor = matchedCat?.color || todo.categoryColor || "#6b7280";
+
   const ddayInfo = getDdayInfo(todo.date, todo.isDone);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(todo.text);
   const [editDate, setEditDate] = useState(todo.date);
   const [editCategory, setEditCategory] = useState(currentCategory);
+  const [editColor, setEditColor] = useState(tagColor);
 
   const handleSave = () => {
     if (editText.trim() === "" || editDate === "") {
       alert("날짜와 일정 내용을 모두 입력해주세요!");
       return;
     }
-    updateTodo(todo.id, editText, editDate, editCategory);
+    updateTodo(todo.id, editText, editDate, editCategory, editColor);
     setIsEditing(false);
   };
 
@@ -52,6 +56,7 @@ export const TodoItem = ({ todo }) => {
     setEditText(todo.text);
     setEditDate(todo.date);
     setEditCategory(currentCategory);
+    setEditColor(tagColor);
     setIsEditing(false);
   };
 
@@ -76,17 +81,13 @@ export const TodoItem = ({ todo }) => {
             <div className="date-display">{editDate || "날짜 선택"}</div>
           </div>
 
-          <select
-            value={editCategory}
-            onChange={(e) => setEditCategory(e.target.value)}
-            className="category-select"
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          <TagSelector
+            selectedTag={editCategory}
+            onSelectTag={(name, color) => {
+              setEditCategory(name);
+              setEditColor(color);
+            }}
+          />
 
           <input
             type="text"
@@ -111,14 +112,12 @@ export const TodoItem = ({ todo }) => {
     <li
       className={`todo-item ${todo.isDone ? "done" : ""} ${todo.isPinned ? "pinned" : ""}`}
     >
-      {/* 상단 좌측: ⭐고정 버튼, 체크박스, 날짜, [카테고리 + D-Day 뱃지 묶음] */}
       <div onClick={() => toggleTodo(todo.id)} className="todo-meta">
-        {/* ✅ 상단 고정(별표) 버튼 */}
         <button
           type="button"
           className={`pin-btn ${todo.isPinned ? "active" : ""}`}
           onClick={(e) => {
-            e.stopPropagation(); // 완료 체크가 동시에 눌리지 않도록 방지
+            e.stopPropagation();
             togglePin(todo.id);
           }}
           title={todo.isPinned ? "상단 고정 해제" : "상단 고정"}
@@ -134,7 +133,14 @@ export const TodoItem = ({ todo }) => {
         </span>
 
         <div className="todo-badges">
-          <span className={`category-badge cat-${currentCategory}`}>
+          <span
+            className="category-badge"
+            style={{
+              backgroundColor: `${tagColor}24`,
+              color: tagColor,
+              border: `1px solid ${tagColor}40`,
+            }}
+          >
             {currentCategory}
           </span>
           {ddayInfo && (
@@ -145,12 +151,10 @@ export const TodoItem = ({ todo }) => {
         </div>
       </div>
 
-      {/* 본문: 일정 텍스트 */}
       <div onClick={() => toggleTodo(todo.id)} className="todo-body">
         <span className="todo-text">{todo.text}</span>
       </div>
 
-      {/* 상단 우측: 수정 및 삭제 버튼 */}
       <div className="todo-actions">
         <button onClick={() => setIsEditing(true)} className="edit-btn">
           수정

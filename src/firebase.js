@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCpJbK2NczWumZbF8pNgFivt2wEyfdPU_k",
@@ -10,6 +11,7 @@ const firebaseConfig = {
   appId: "1:299107853494:web:3752dd35e79162475c7217",
 };
 
-// 파이어베이스 초기화 및 데이터베이스(Firestore) 연결
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();

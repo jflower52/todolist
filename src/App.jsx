@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { auth, googleProvider } from "@/firebase";
 import { TodoInput } from "@/components/TodoInput";
 import { TodoList } from "@/components/TodoList";
 import { CalendarWidget } from "@/components/CalendarWidget";
@@ -7,25 +9,32 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTodoStore } from "@/store/useTodoStore";
 import "./App.css";
 
-const FILTER_CATEGORIES = [
-  "전체",
-  "업무",
-  "공부",
-  "개인",
-  "약속",
-  "중요",
-  "기타",
-];
-
-// 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져오는 헬퍼 함수
 const getTodayStr = () => {
   const today = new Date();
   const offset = today.getTimezoneOffset() * 60000;
   return new Date(today.getTime() - offset).toISOString().split("T")[0];
 };
 
+// 현재 브라우저가 아닌 '설치된 앱(전체화면)' 상태로 실행 중인지 확인
+const checkIsStandalone = () => {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+};
+
 function App() {
+  const [authLoading, setAuthLoading] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(checkIsStandalone);
+
+  const user = useTodoStore((state) => state.user);
+  const setUser = useTodoStore((state) => state.setUser);
+  const clearUserData = useTodoStore((state) => state.clearUserData);
+
   const todos = useTodoStore((state) => state.todos);
+  const categories = useTodoStore((state) => state.categories);
   const filter = useTodoStore((state) => state.filter);
   const setFilter = useTodoStore((state) => state.setFilter);
   const categoryFilter = useTodoStore((state) => state.categoryFilter);
@@ -40,13 +49,60 @@ function App() {
   const viewMode = useTodoStore((state) => state.viewMode);
   const setViewMode = useTodoStore((state) => state.setViewMode);
 
-  const subscribeToTodos = useTodoStore((state) => state.subscribeToTodos);
+  const subscribeToUserTodos = useTodoStore(
+    (state) => state.subscribeToUserTodos,
+  );
   const isCloudSynced = useTodoStore((state) => state.isCloudSynced);
 
+  // ✅ PWA 앱 설치 이벤트 감지
   useEffect(() => {
-    const unsubscribe = subscribeToTodos();
-    return () => unsubscribe();
-  }, [subscribeToTodos]);
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  // 로그인 상태 감지 및 해당 사용자의 개인 일정 구독
+  useEffect(() => {
+    let unsubFirestore = () => {};
+
+    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
+      unsubFirestore();
+      if (currentUser) {
+        setUser({
+          uid: currentUser.uid,
+          displayName: currentUser.displayName || "사용자",
+          email: currentUser.email,
+          photoURL: currentUser.photoURL,
+        });
+        unsubFirestore = subscribeToUserTodos(currentUser.uid);
+      } else {
+        setUser(null);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => {
+      unsubAuth();
+      unsubFirestore();
+    };
+  }, [setUser, subscribeToUserTodos]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -56,7 +112,86 @@ function App() {
     }
   }, [isDarkMode]);
 
-  // ✅ 대시보드 요약 카드용 실시간 통계 계산 (미완료 일정 기준)
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error("구글 로그인 실패:", error);
+      alert(
+        "로그인 중 문제가 발생했습니다. 파이어베이스에서 Google 로그인이 켜져 있는지 확인해주세요.",
+      );
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    clearUserData();
+  };
+
+  // ✅ 앱 다운로드(설치) 버튼 클릭 처리
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        setDeferredPrompt(null);
+      }
+    } else {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        alert(
+          "📱 아이폰/아이패드 앱 설치 방법:\n\n1. 사파리 하단 가운데 [공유 📤] 버튼을 누릅니다.\n2. 메뉴에서 [홈 화면에 추가]를 누르면 바탕화면에 전체화면 앱으로 설치됩니다!",
+        );
+      } else {
+        alert(
+          "💻 앱 설치 방법:\n\n브라우저 우측 상단 주소창 옆의 [앱 설치 📥] 아이콘이나 메뉴(⋮) ➔ [앱 설치 / 홈 화면에 추가]를 눌러주세요!",
+        );
+      }
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="auth-screen">
+        <div className="auth-card">
+          <p className="auth-desc">⏳ 로그인 정보를 확인하고 있습니다...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="auth-screen">
+        <div className="auth-card">
+          <div className="auth-top-bar">
+            <span className="auth-logo">📅</span>
+            <ThemeToggle />
+          </div>
+          <h1 className="auth-title">나의 일정 플래너</h1>
+          <p className="auth-desc">
+            구글 계정으로 로그인하면 나만의 개인 캘린더와 할 일 목록이
+            <br />
+            PC와 스마트폰 어디서나 실시간으로 동기화됩니다.
+          </p>
+          <button onClick={handleGoogleLogin} className="google-login-btn">
+            <span className="google-g-icon">G</span>
+            <span>Google 계정으로 시작하기</span>
+          </button>
+
+          {!isInstalled && (
+            <button
+              onClick={handleInstallClick}
+              className="install-app-btn auth-install"
+            >
+              📲 기기에 앱으로 다운로드 (설치)
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const todayStr = getTodayStr();
   const activeTodos = todos.filter((t) => !t.isDone);
   const todayCount = activeTodos.filter((t) => t.date === todayStr).length;
@@ -93,15 +228,37 @@ function App() {
       </div>
 
       <div className="category-filter-chips">
-        {FILTER_CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            className={`chip-btn ${categoryFilter === cat ? "active" : ""}`}
-            onClick={() => setCategoryFilter(cat)}
-          >
-            {cat}
-          </button>
-        ))}
+        <button
+          className={`chip-btn ${categoryFilter === "전체" ? "active" : ""}`}
+          onClick={() => setCategoryFilter("전체")}
+        >
+          전체
+        </button>
+        {categories.map((cat) => {
+          const isActive = categoryFilter === cat.name;
+          return (
+            <button
+              key={cat.name}
+              className={`chip-btn ${isActive ? "active" : ""}`}
+              style={
+                isActive
+                  ? {
+                      backgroundColor: cat.color,
+                      borderColor: cat.color,
+                      color: "#fff",
+                    }
+                  : undefined
+              }
+              onClick={() => setCategoryFilter(cat.name)}
+            >
+              <span
+                className="chip-color-dot"
+                style={{ backgroundColor: isActive ? "#fff" : cat.color }}
+              />
+              {cat.name}
+            </button>
+          );
+        })}
       </div>
 
       <div className="filter-tabs-row">
@@ -150,12 +307,37 @@ function App() {
               }}
             >
               {isCloudSynced
-                ? "☁️ 클라우드 실시간 연동 중"
+                ? "☁️ 개인 클라우드 동기화됨"
                 : "⏳ 클라우드 연결 중..."}
             </span>
           </div>
           <ThemeToggle />
         </div>
+
+        {/* 로그인된 사용자 프로필 & 로그아웃 바 */}
+        <div className="user-profile-bar">
+          <div className="user-profile-info">
+            {user.photoURL ? (
+              <img src={user.photoURL} alt="프로필" className="user-avatar" />
+            ) : (
+              <div className="user-avatar-fallback">{user.displayName[0]}</div>
+            )}
+            <div className="user-text-box">
+              <span className="user-name">{user.displayName}</span>
+              <span className="user-email">{user.email}</span>
+            </div>
+          </div>
+          <button onClick={handleLogout} className="logout-btn">
+            로그아웃
+          </button>
+        </div>
+
+        {/* ✅ 브라우저로 접속 중일 때만 보이는 '앱으로 다운로드' 버튼 */}
+        {!isInstalled && (
+          <button onClick={handleInstallClick} className="install-app-btn">
+            📲 앱으로 다운로드 (설치)
+          </button>
+        )}
 
         <div className="view-toggle-group">
           <button
@@ -212,7 +394,6 @@ function App() {
               <h2>{selectedDate ? `${selectedDate} 일정` : "📂 전체 일정"}</h2>
             </div>
             <div className="main-content">
-              {/* ✅ 상단 미니 대시보드 요약 카드 4종 */}
               <section className="summary-dashboard">
                 <div
                   className={`summary-card card-today ${selectedDate === todayStr ? "selected" : ""}`}
