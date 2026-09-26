@@ -18,26 +18,25 @@ import "./App.css";
 
 const NativeGoogleAuth = registerPlugin("NativeGoogleAuth");
 
+// ✅ GitHub Releases APK 직통 다운로드 주소
+const APK_DOWNLOAD_URL =
+  "https://github.com/jflower52/DoneDay_APK/releases/download/v1.0.0/doneday.apk";
+
 const getTodayStr = () => {
   const today = new Date();
   const offset = today.getTimezoneOffset() * 60000;
   return new Date(today.getTime() - offset).toISOString().split("T")[0];
 };
 
-// 현재 브라우저가 아닌 '설치된 앱(전체화면)' 상태로 실행 중인지 확인
+// ✅ 안드로이드 APK 앱으로 실행 중이거나 아이폰 홈 화면 앱으로 실행 중인지 확인
 const checkIsStandalone = () => {
   if (typeof window === "undefined") return false;
-  return (
-    Capacitor.isNativePlatform() ||
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true
-  );
+  return Capacitor.isNativePlatform() || window.navigator.standalone === true;
 };
 
 function App() {
   const [authLoading, setAuthLoading] = useState(true);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isInstalled, setIsInstalled] = useState(checkIsStandalone);
+  const [isInstalled] = useState(checkIsStandalone);
 
   const user = useTodoStore((state) => state.user);
   const setUser = useTodoStore((state) => state.setUser);
@@ -63,30 +62,6 @@ function App() {
     (state) => state.subscribeToUserTodos,
   );
   const isCloudSynced = useTodoStore((state) => state.isCloudSynced);
-
-  // ✅ PWA 앱 설치 이벤트 감지
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
-
-    return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt,
-      );
-      window.removeEventListener("appinstalled", handleAppInstalled);
-    };
-  }, []);
 
   // 로그인 상태 감지 및 해당 사용자의 개인 일정 구독
   useEffect(() => {
@@ -146,26 +121,22 @@ function App() {
     clearUserData();
   };
 
-  // ✅ 앱 다운로드(설치) 버튼 클릭 처리
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        setDeferredPrompt(null);
-      }
-    } else {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) {
-        alert(
-          "📱 아이폰/아이패드 앱 설치 방법:\n\n1. 사파리 하단 가운데 [공유 📤] 버튼을 누릅니다.\n2. 메뉴에서 [홈 화면에 추가]를 누르면 바탕화면에 전체화면 앱으로 설치됩니다!",
-        );
-      } else {
-        alert(
-          "💻 앱 설치 방법:\n\n브라우저 우측 상단 주소창 옆의 [앱 설치 📥] 아이콘이나 메뉴(⋮) ➔ [앱 설치 / 홈 화면에 추가]를 눌러주세요!",
-        );
-      }
+  // ✅ 창 이동 없이 깃허브 Releases에서 즉시 APK 다운로드 실행 (아이폰은 홈 화면 안내)
+  const handleInstallClick = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      alert(
+        "📱 아이폰/아이패드 안내:\n\n아이폰은 APK 설치를 지원하지 않습니다.\n사파리 하단 가운데 [공유 📤] ➔ [홈 화면에 추가]를 눌러 앱으로 사용해주세요!",
+      );
+      return;
     }
+
+    const link = document.createElement("a");
+    link.href = APK_DOWNLOAD_URL;
+    link.setAttribute("download", "doneday.apk");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (authLoading) {
@@ -202,7 +173,7 @@ function App() {
               onClick={handleInstallClick}
               className="install-app-btn auth-install"
             >
-              📲 기기에 앱으로 다운로드 (설치)
+              📲 안드로이드 앱(APK) 다운로드
             </button>
           )}
         </div>
@@ -350,10 +321,10 @@ function App() {
           </button>
         </div>
 
-        {/* ✅ 브라우저로 접속 중일 때만 보이는 '앱으로 다운로드' 버튼 */}
+        {/* ✅ 브라우저로 접속 중일 때만 보이는 'APK 다운로드' 버튼 */}
         {!isInstalled && (
           <button onClick={handleInstallClick} className="install-app-btn">
-            📲 앱으로 다운로드 (설치)
+            📲 안드로이드 앱(APK) 다운로드
           </button>
         )}
 
